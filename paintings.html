@@ -28,17 +28,16 @@
   
   
 </td></tr></table>
-  <div class="container" style="text-align: center; 
+ <div class="container"; 
                                   margin-top: 5em;">
         <!-- Image to be enlarged and onclick() function call-->
         <img src=
-"ArinjayDasbhadra.jpg" alt="alt text" width="200px" height="150px"            onclick="enlargeImg()"
+"https://media.geeksforgeeks.org/wp-content/uploads/geeksforgeeks-6.png" 
+             onclick="enlargeImg()"
              id="img1" />
         <br /><br /><br />
-        <!-- Image to be reset and onclick() function call-->
-        <img src=
-          "ArinjayDasbhadra.jpg" alt="alt text" width="200px" height="150px" onclick="resetImg()"
-          id="img1">
+        <!-- Button to reset the Image size -->
+        <button onclick="resetImg()">Reset</button>
     </div>
 
     <!-- script to set display property -->
@@ -47,8 +46,8 @@
         img = document.getElementById("img1");
         // Function to increase image size
         function enlargeImg() {
-            // Set image size to 5 times original
-            img.style.transform = "scale(5)";
+            // Set image size to 1.5 times original
+            img.style.transform = "scale(1.5)";
             // Animation effect
             img.style.transition = "transform 0.25s ease";
         }
@@ -61,6 +60,7 @@
     </script>
   
 <table class="imgtable"><tr><td>
+  <img src= "ArinjayDasbhadra.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr>
 <img src="ArinjayDasbhadra2.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr>
 <img src="ArinjayDasbhadra3.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr> 
 <img src="ArinjayDasbhadra4.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr>
