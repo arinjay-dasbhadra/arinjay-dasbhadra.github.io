@@ -163,6 +163,40 @@
     </script>
   <br>
 
+    <div class="container" style="text-align: center; 
+                                  margin-top: 5em;">
+       
+        
+        <img src=
+"car drawing.jfif" alt="alt text" height="220px" width="150px" onclick="enlargeImg5()" 
+             id="img5" />
+        <!-- Button to reset the Image size -->
+         <img src=
+"esc3.jpg" alt="alt text" width="140px" height="140px" onclick="resetImg5()">
+    </div>
+  
+
+    <!-- script to set display property -->
+    <script>
+        // Get the img4 object using its Id
+        img5 = document.getElementById("img5");
+        // Function to increase image size
+        function enlargeImg5() {
+            // Set image size to 5 times original
+            img5.style.transform = "scale(5)";
+            // Animation effect
+            img5.style.transition = "transform 0.25s ease";
+        }
+        // Function to reset image size
+        function resetImg5() {
+            // Set image size to original
+            img5.style.transform = "scale(1)";
+            img5.style.transition = "transform 0.25s ease";
+        }
+    </script>
+  <br>
+
+
 
   
    
