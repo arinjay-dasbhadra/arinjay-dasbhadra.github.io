@@ -32,10 +32,10 @@
                                   margin-top: 5em;">
         <!-- Image to be enlarged and onclick() function call-->
         <img src=
-"https://media.geeksforgeeks.org/wp-content/uploads/geeksforgeeks-6.png" 
-             onclick="enlargeImg()"
+"ArinjayDasbhadra.jpg" alt="alt text" width="200px" height="150px"             onclick="enlargeImg()"
              id="img1" />
-        <br /><br /><br />
+        <br /><br /><br /><br /><br /><br />
+
         <!-- Button to reset the Image size -->
         <button onclick="resetImg()">Reset</button>
     </div>
@@ -46,8 +46,8 @@
         img = document.getElementById("img1");
         // Function to increase image size
         function enlargeImg() {
-            // Set image size to 1.5 times original
-            img.style.transform = "scale(1.5)";
+            // Set image size to 5 times original
+            img.style.transform = "scale(5)";
             // Animation effect
             img.style.transition = "transform 0.25s ease";
         }
