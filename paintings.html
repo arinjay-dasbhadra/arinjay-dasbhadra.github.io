@@ -568,7 +568,39 @@ span.onclick = function() {
 }
 </script>
 
-  <img id="myImg5" src="Arinjay Dasbhadra4.jpg" alt="Moonlight Scenery<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+  <img id="myImg4" src="Arinjay Dasbhadra4.jpg" alt="Moonlight Scenery<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="img01">
+  <div id="caption"></div>
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the image and insert it inside the modal - use its "alt" text as a caption
+var img = document.getElementById("myImg4");
+var modalImg = document.getElementById("img01");
+var captionText = document.getElementById("caption");
+img.onclick = function(){
+  modal.style.display = "block";
+  modalImg.src = this.src;
+  captionText.innerHTML = this.alt;
+}
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() { 
+  modal.style.display = "none";
+}
+</script>
+
+   <img id="myImg5" src="car drawing.jfif" alt="Mountains and a car<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -600,75 +632,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg" src="Arinjay Dasbhadra.jpg" alt="Mountains and a lake<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
-
-<!-- The Modal -->
-<div id="myModal" class="modal">
-  <span class="close">&times;</span>
-  <img class="modal-content" id="img01">
-  <div id="caption"></div>
-</div>
-
-<script>
-// Get the modal
-var modal = document.getElementById("myModal");
-
-// Get the image and insert it inside the modal - use its "alt" text as a caption
-var img = document.getElementById("myImg");
-var modalImg = document.getElementById("img01");
-var captionText = document.getElementById("caption");
-img.onclick = function(){
-  modal.style.display = "block";
-  modalImg.src = this.src;
-  captionText.innerHTML = this.alt;
-}
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() { 
-  modal.style.display = "none";
-}
-</script>
-
-   <div class="container" style="text-align: center; 
-                                  margin-top: 5em;">
-       
-        
-       
-   <div class="container" style="text-align: center; 
-                                  margin-top: 5em;">
-       
-        
-        <img src=
-"ArinjayDasbhadra4.jpg" alt="alt text" width="200px" height="150px"  onclick="enlargeImg4()" 
-             id="img4" />
-        <!-- Button to reset the Image size -->
-         <img src=
-"esc3.jpg" alt="alt text" width="140px" height="140px" onclick="resetImg4()">
-    </div>
   
-
-    <!-- script to set display property -->
-    <script>
-        // Get the img4 object using its Id
-        img4 = document.getElementById("img4");
-        // Function to increase image size
-        function enlargeImg4() {
-            // Set image size to 5 times original
-            img4.style.transform = "scale(5)";
-            // Animation effect
-            img4.style.transition = "transform 0.25s ease";
-        }
-        // Function to reset image size
-        function resetImg4() {
-            // Set image size to original
-            img4.style.transform = "scale(1)";
-            img4.style.transition = "transform 0.25s ease";
-        }
-    </script>
-  <br>
 
     <div class="container" style="text-align: center; 
                                   margin-top: 5em;">
