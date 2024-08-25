@@ -96,12 +96,46 @@
     </script>
   <br>
 
+    
+   <div class="container" style="text-align: center; 
+                                  margin-top: 5em;">
+       
+        
+        <img src=
+"ArinjayDasbhadra3.jpg" alt="alt text" width="200px" height="150px"  onclick="enlargeImg3()" 
+             id="img3" />
+        <!-- Button to reset the Image size -->
+         <img src=
+"esc2.jpg" alt="alt text" width="130px" height="130px" onclick="resetImg3()">
+    </div>
+  
+
+    <!-- script to set display property -->
+    <script>
+        // Get the img2 object using its Id
+        img3 = document.getElementById("img3");
+        // Function to increase image size
+        function enlargeImg2() {
+            // Set image size to 5 times original
+            img3.style.transform = "scale(5)";
+            // Animation effect
+            img3.style.transition = "transform 0.25s ease";
+        }
+        // Function to reset image size
+        function resetImg2() {
+            // Set image size to original
+            img3.style.transform = "scale(1)";
+            img3.style.transition = "transform 0.25s ease";
+        }
+    </script>
+  <br>
+
+
   
    
   
   
 <table class="imgtable"><tr><td>
-<img src="ArinjayDasbhadra2.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr>
 <img src="ArinjayDasbhadra3.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr> 
 <img src="ArinjayDasbhadra4.jpg" alt="alt text" width="200px" height="150px" />&nbsp;</tr>
   <img src="car drawing.jfif" alt="alt text" height="220px" width="150px" />&nbsp;</tr>
