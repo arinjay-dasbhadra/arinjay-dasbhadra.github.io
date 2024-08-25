@@ -27,8 +27,7 @@
 <br/></p>
 <p><i>*Click the picture to enlarge the picture, then click the escape button beside it to shorten the picture</i></p>
   </td></tr></table>
- <div class="container" style="text-align: center; 
-                                  margin-top: 5em;">
+ <div class="container" style="text-align: center>
     <style> 
         img { 
             margin: 190px; /* Adjust the value as needed */ 
@@ -63,9 +62,8 @@
         }
     </script>
 
-  // This is second picture
-   <div class="container" style="text-align: center; 
-                                  margin-top: 5em;">
+  
+   <div class="container" style="text-align: center;">
     <style> 
         img { 
             margin: 190px; /* Adjust the value as needed */ 
@@ -73,8 +71,8 @@
     </style> 
         <!-- Image to be enlarged and onclick() function call-->
         <img src=
-"ArinjayDasbhadra.jpg" alt="alt text" width="200px" height="150px"             onclick="enlargeImg()" 
-             id="img1" />
+"ArinjayDasbhadra2.jpg" alt="alt text" width="200px" height="150px"             onclick="enlargeImg()" 
+             id="img2" />
         <!-- Button to reset the Image size -->
          <img src=
 "escape.jpg" alt="alt text" width="130px" height="120px" onclick="resetImg()">
@@ -84,7 +82,7 @@
     <!-- script to set display property -->
     <script>
         // Get the img object using its Id
-        img = document.getElementById("img1");
+        img = document.getElementById("img2");
         // Function to increase image size
         function enlargeImg() {
             // Set image size to 5 times original
