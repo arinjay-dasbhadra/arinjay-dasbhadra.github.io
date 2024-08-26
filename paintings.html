@@ -1838,7 +1838,113 @@
   }
 }
 </style>
-  
+
+    <style>
+#myImg18 {
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#myImg18:hover  {opacity: 0.7;
+  /* Start the shake animation and make the animation last for 0.5 seconds */
+  animation: shake 0.5s;
+
+  /* When the animation is finished, start again */
+  animation-iteration-count: infinite;
+}
+
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (image) */
+.modal-content {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 1000px;
+}
+
+/* Caption of Modal Image */
+#caption {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 1000px;
+  text-align: center;
+  color: #ccc;
+  padding: 10px 0;
+  height: 150px;
+}
+
+/* Add Animation */
+.modal-content, #caption {  
+  -webkit-animation-name: zoom;
+  -webkit-animation-duration: 0.6s;
+  animation-name: zoom;
+  animation-duration: 0.6s;
+}
+
+@-webkit-keyframes zoom {
+  from {-webkit-transform1:scale(0)} 
+  to {-webkit-transform1:scale(1)}
+}
+
+@keyframes zoom {
+  from {transform:scale(0)} 
+  to {transform:scale(1)}
+}
+
+/* The Close Button */
+.close {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen1 and (max-width: 1000px){
+  .modal-content {
+    width: 100%;
+  }
+}
+</style>
 </head>
 <body style="background-color:#039c70;">
 <div id="fwtitle">
@@ -1865,7 +1971,7 @@
 <p><i>* Click the picture to enlarge the picture, then click the X button beside it to shorten the picture.</i></p>
   </td></tr></table>
   <br>
-  <img id="myImg" src="Arinjay Dasbhadra.jpg" alt="Mountains and a lake<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+  <img id="myImg" src="Arinjay Dasbhadra.jpg" alt="Mountains and a lake<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -1897,7 +2003,7 @@ span.onclick = function() {
 }
 </script>
 
-    <img id="myImg2" src="ArinjayDasbhadra2.jpg"" alt="Train<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+    <img id="myImg2" src="ArinjayDasbhadra2.jpg" alt="Train<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -1929,7 +2035,7 @@ span.onclick = function() {
 }
 </script>
 
-  <img id="myImg3" src="Arinjay Dasbhadra3.jpg" alt="Supermarket<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+  <img id="myImg3" src="Arinjay Dasbhadra3.jpg" alt="Supermarket<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -1961,7 +2067,7 @@ span.onclick = function() {
 }
 </script>
 
-  <img id="myImg4" src="Arinjay Dasbhadra4.jpg" alt="Moonlight Scenery<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+  <img id="myImg4" src="Arinjay Dasbhadra4.jpg" alt="Moonlight Scenery<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -1993,7 +2099,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg5" src="car drawing.jfif" alt="Mountains and a car<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+   <img id="myImg5" src="car drawing.jfif" alt="Mountains and a car<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2025,7 +2131,7 @@ span.onclick = function() {
 }
 </script>
 
-    <img id="myImg6" src="Mountain.jpg" alt="Snowy Mountains<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+    <img id="myImg6" src="Mountain.jpg" alt="Snowy Mountains<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2057,7 +2163,7 @@ span.onclick = function() {
 }
 </script>
 
-  <img id="myImg7" src="Pokemon.jpg" alt="Ash and Pikachu<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+  <img id="myImg7" src="Pokemon.jpg" alt="Ash and Pikachu<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2089,7 +2195,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg8" src="Porshe.jpg" alt="Car<br>Please continue looking at my other arts and craft" style="width:100%;max-width:300px">
+   <img id="myImg8" src="Porshe.jpg" alt="Car<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:300px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2121,7 +2227,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg9" src="rifting Mazda.jpg" alt="A car is drifting<br>Please continue looking at my other arts and craft" style="width:100%;max-width:280px">
+   <img id="myImg9" src="rifting Mazda.jpg" alt="A car is drifting<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:280px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2153,7 +2259,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg10" src="Scenary.jpg" alt="Rural Scenary<br>Please continue looking at my other arts and craft" style="width:100%;max-width:220px">
+   <img id="myImg10" src="Scenary.jpg" alt="Rural Scenary<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:220px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2185,7 +2291,7 @@ span.onclick = function() {
 }
 </script>
 
-    <img id="myImg11" src="Sun Scenary.jpg" alt="Sunset Scenary<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+    <img id="myImg11" src="Sun Scenary.jpg" alt="Sunset Scenary<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2217,7 +2323,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg12" src="Transformer.jpg" alt="Bumblebee<br>The Transformer<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+   <img id="myImg12" src="Transformer.jpg" alt="Bumblebee<br>The Transformer<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2248,7 +2354,7 @@ span.onclick = function() {
   modal.style.display = "none";
 }
 </script>
-   <img id="myImg13" src="waterfall 2.jpg" alt="Tiny Waterfall<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+   <img id="myImg13" src="waterfall 2.jpg" alt="Tiny Waterfall<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2281,7 +2387,7 @@ span.onclick = function() {
 </script>
 
   
-    <img id="myImg14" src="Waterfall.jpg" alt="Massive Waterfall<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+    <img id="myImg14" src="Waterfall.jpg" alt="Massive Waterfall<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2313,7 +2419,7 @@ span.onclick = function() {
 }
 </script>
 
-    <img id="myImg15" src="dollcraft.jpg" alt="Woman <br>(Made of choclate wrappers)<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+    <img id="myImg15" src="dollcraft.jpg" alt="Woman <br>(Made of choclate wrappers)<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2345,7 +2451,7 @@ span.onclick = function() {
 }
 </script>
 
-  <img id="myImg16" src="flower.jpg" alt="Flower<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+  <img id="myImg16" src="flower.jpg" alt="Flower<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2377,7 +2483,7 @@ span.onclick = function() {
 }
 </script>
 
-   <img id="myImg17" src="pumpkin.jpg" alt="Pumpkin<br>Please continue looking at my other arts and craft" style="width:100%;max-width:200px">
+   <img id="myImg17" src="pumpkin.jpg" alt="Pumpkin<br>Please continue looking at my other arts and crafts" style="width:100%;max-width:200px">
 
 <!-- The Modal -->
 <div id="myModal" class="modal">
@@ -2408,6 +2514,39 @@ span.onclick = function() {
   modal.style.display = "none";
 }
 </script>
+
+    <img id="myImg18" src="Rabbit.jpg" alt="Rabbit<br>Other arts and crafts coming soon!!!" style="width:100%;max-width:200px">
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="img01">
+  <div id="caption"></div>
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the image and insert it inside the modal - use its "alt" text as a caption
+var img = document.getElementById("myImg18");
+var modalImg = document.getElementById("img01");
+var captionText = document.getElementById("caption");
+img.onclick = function(){
+  modal.style.display = "block";
+  modalImg.src = this.src;
+  captionText.innerHTML = this.alt;
+}
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() { 
+  modal.style.display = "none";
+}
+</script>
+
   <br>
 
   
