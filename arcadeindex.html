@@ -13,8 +13,35 @@
             align-items: center;
             min-height: 100vh;
             font-family: 'Courier New', monospace;
+            flex-direction: column;
         }
-        #menu { text-align: center; }
+        .topnav {
+            width: 100%;
+            overflow: hidden;
+            background-color: #333;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .topnav a {
+            float: left;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+            font-family: Verdana, sans-serif;
+        }
+        .topnav a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .topnav a.active {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        #menu { text-align: center; margin-top: 60px; }
         h1 { color: #ff6b6b; font-size: 36px; margin: 20px 0; text-shadow: 0 0 20px #ff6b6b; }
         p { color: #888; margin-bottom: 30px; }
         .game-btn {
@@ -38,6 +65,14 @@
     </style>
 </head>
 <body>
+    <div class="topnav">
+        <a href="index.html">Home</a>
+        <a href="paintings.html">Arts and Crafts</a>
+        <a href="stories.html">Stories</a>
+        <a href="codings.html">Codings</a>
+        <a href="arcadeindex.html" class="active">Games</a>
+    </div>
+
     <div id="menu">
         <h1>ARCADE GAMES</h1>
         <p>Choose a game</p>
