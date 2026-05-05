@@ -82,7 +82,7 @@
                 <div id="ai1" class="car ai" style="display:none;"><div class="car-body"><div class="car-hood"></div><div class="car-windshield"></div><div class="car-roof"></div></div></div>
                 <div id="ai2" class="car ai purple" style="display:none;"><div class="car-body"><div class="car-hood"></div><div class="car-windshield"></div><div class="car-roof"></div></div></div>
                 <div class="gameOver" id="carGameOver"><h1>GAME OVER</h1><p>Score: <span id="finalScore">0</span></p><button class="restartBtn" onclick="restartCar()">PLAY AGAIN</button></div>
-                <div class="controls">A/D keys to move</div>
+                <div class="controls">Left/Right arrow keys to move</div>
             </div>
         </div>
     </div>
@@ -97,7 +97,7 @@
         var aiCars = [];
         var aiCarIdCounter = 0;
         var powerups = [];
-        var keys = {a: false, d: false};
+        var keys = {left: false, right: false};
 
         function initCarGame() {
             carScore = 0; carLevel = 1; carSpeed = 5; carMaxObjects = 2; carGameTime = 0;
@@ -121,8 +121,8 @@
         function carGameLoop() {
             if (!carRunning) return;
             carGameTime++;
-            if (keys.a) playerX = Math.max(10, playerX - 10);
-            if (keys.d) playerX = Math.min(306, playerX + 10);
+            if (keys.left) playerX = Math.max(10, playerX - 10);
+            if (keys.right) playerX = Math.min(306, playerX + 10);
             document.getElementById('player').style.left = playerX + 'px';
             if (carGameTime % 15 === 0 && carObjects.length < carMaxObjects) spawnCarObject();
             if (carGameTime % 300 === 0) {
@@ -229,18 +229,18 @@
 
         var carTouchStartX = 0;
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'a' || e.key === 'A') { keys.a = true; e.preventDefault(); }
-            if (e.key === 'd' || e.key === 'D') { keys.d = true; e.preventDefault(); }
+            if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+            if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
         });
         document.addEventListener('keyup', function(e) {
-            if (e.key === 'a' || e.key === 'A') keys.a = false;
-            if (e.key === 'd' || e.key === 'D') keys.d = false;
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowRight') keys.right = false;
         });
         document.getElementById('carArea').addEventListener('touchstart', function(e) { carTouchStartX = e.touches[0].clientX; });
         document.getElementById('carArea').addEventListener('touchend', function(e) {
             var delta = e.changedTouches[0].clientX - carTouchStartX;
-            if (delta < -30) keys.a = true, setTimeout(function() { keys.a = false; }, 200);
-            if (delta > 30) keys.d = true, setTimeout(function() { keys.d = false; }, 200);
+            if (delta < -30) keys.left = true, setTimeout(function() { keys.left = false; }, 200);
+            if (delta > 30) keys.right = true, setTimeout(function() { keys.right = false; }, 200);
         });
 
         initCarGame();
