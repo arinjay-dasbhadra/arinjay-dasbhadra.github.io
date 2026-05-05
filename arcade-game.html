@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Games</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #1a1a2e, #16213e); display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Courier New', monospace; }
+        #menu { text-align: center; }
+        h1 { color: #ff6b6b; font-size: 36px; margin: 20px 0; text-shadow: 0 0 20px #ff6b6b; }
+        p { color: #888; margin-bottom: 30px; }
+        .game-btn { display: block; width: 280px; padding: 20px; margin: 15px auto; font-size: 20px; color: #fff; border: none; border-radius: 12px; cursor: pointer; }
+        .car-btn { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .stack-btn { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .plane-btn { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .snake-btn { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .bounce-btn { background: linear-gradient(135deg, #222, #000); }
+        .game-btn.stack { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .reset-btn { display: block; width: 200px; padding: 10px; margin: 30px auto; font-size: 14px; background: #555; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        #gameArea { display: none; width: 360px; height: 640px; background: #1a1a2e; border: 4px solid #ff6b6b; border-radius: 8px; overflow: hidden; position: relative; }
+        #backBtn { position: absolute; top: 10px; right: 10px; padding: 8px 16px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; z-index: 999; }
+        #carGame { display: none; width: 100%; height: 100%; position: absolute; background: #3d3d5c; }
+        #road { width: 100%; height: 100%; background: repeating-linear-gradient(to bottom, #3d3d5c, #3d3d5c 40px, #4d4d6c 40px, #4d4d6c 80px); animation: scroll 0.3s linear infinite; }
+        @keyframes scroll { from { background-position: 0 0; } to { background-position: 0 80px; } }
+        #carArea { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .car { position: absolute; width: 40px; height: 60px; }
+        .car-body { width: 100%; height: 100%; background: linear-gradient(to bottom, #e74c3c, #c0392b); border-radius: 6px; }
+        .car.powered .car-body { box-shadow: 0 0 20px #2ecc71, 0 0 40px #2ecc71; border: 3px solid #2ecc71; }
+        .car.blink-power .car-body { animation: blinkCar 0.2s infinite; }
+        @keyframes blinkCar { 0%, 100% { box-shadow: 0 0 20px #2ecc71, 0 0 40px #2ecc71; border-color: #2ecc71; } 50% { box-shadow: none; border-color: #e74c3c; } }
+        .car-hood { position: absolute; top: 5px; left: 3px; width: 34px; height: 15px; background: #ff6b6b; border-radius: 4px 4px 0 0; }
+        .car-windshield { position: absolute; top: 20px; left: 4px; width: 32px; height: 15px; background: #5dade2; border-radius: 3px; }
+        .car-roof { position: absolute; top: 35px; left: 5px; width: 30px; height: 12px; background: #c0392b; border-radius: 2px; }
+        .car-headlight { position: absolute; top: 10px; width: 6px; height: 8px; background: #fff; border-radius: 2px; }
+        .car-headlight.left { left: 3px; }
+        .car-headlight.right { right: 3px; }
+        .ai .car-body { background: linear-gradient(to bottom, #3498db, #2980b9); }
+        .ai.purple .car-body { background: linear-gradient(to bottom, #9b59b6, #8e44ad); }
+        .coin { position: absolute; width: 24px; height: 24px; background: #f1c40f; border-radius: 50%; border: 2px solid #e67e22; z-index: 5; }
+        .coin::after { content: '$'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #e67e22; font-weight: bold; }
+        .obstacle { position: absolute; width: 26px; height: 30px; background: radial-gradient(circle at 30% 30%, #555, #222); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .obstacle::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 4px; height: 8px; background: linear-gradient(to top, #888, #444); border-radius: 2px; }
+        .obstacle::after { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; background: radial-gradient(circle, #ff6600, #ff0000, transparent); border-radius: 50%; animation: fuse 0.5s infinite; }
+        @keyframes fuse { 0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); } 50% { opacity: 0.7; transform: translateX(-50%) scale(1.3); } }
+        .powerup { position: absolute; width: 24px; height: 24px; background: #2ecc71; border-radius: 50%; border: 2px solid #fff; z-index: 5; }
+        .powerup::after { content: '⚡'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; }
+        #carArea .ui { position: absolute; top: 10px; left: 10px; z-index: 10; }
+        .ui-box { background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 6px; color: #fff; font-size: 16px; display: inline-block; }
+        .score-val { color: #f1c40f; }
+        #carArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #carArea .gameOver h1 { font-size: 36px; color: #e74c3c; }
+        #carArea .gameOver p { font-size: 18px; margin: 20px 0; }
+        .restartBtn { padding: 12px 30px; font-size: 18px; background: #ff6b6b; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        .controls { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 14px; z-index: 15; }
+        #stackGame { display: none; width: 100%; height: 100%; position: absolute; background: #16213e; }
+        #stackArea { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #stackArea .ui { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; color: #fff; font-size: 16px; z-index: 10; }
+        #grid { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); width: 280px; height: 504px; display: grid; grid-template-columns: repeat(10,28px); grid-template-rows: repeat(18,28px); gap: 1px; background: #0a0a15; }
+        .cell { width: 28px; height: 28px; background: transparent; }
+        #stackArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #stackArea .gameOver h1 { font-size: 32px; color: #e74c3c; }
+        #stackArea .gameOver p { font-size: 18px; margin: 15px 0; }
+        .restart { padding: 12px 30px; font-size: 18px; background: #3498db; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+#stackInstructions { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #666; font-size: 12px; }
+
+        /* Flying Aeroplane */
+        #planeGame { display: none; width: 100%; height: 100%; position: absolute; background: #87CEEB; }
+        #planeArea { position: absolute; width: 100%; height: 100%; }
+        #planeArea .plane { position: absolute; width: 60px; height: 35px; }
+        #planeArea .plane-body { position: absolute; width: 40px; height: 20px; background: #e74c3c; border-radius: 10px 20px 20px 10px; left: 10px; top: 8px; }
+        #planeArea .plane-wing { position: absolute; width: 25px; height: 8px; background: #c0392b; left: 15px; top: 16px; border-radius: 2px; }
+        #planeArea .plane-wing-bottom { position: absolute; width: 25px; height: 8px; background: #c0392b; left: 15px; top: 24px; border-radius: 2px; }
+        #planeArea .plane-tail { position: absolute; width: 12px; height: 10px; background: #e74c3c; left: 0px; top: 12px; border-radius: 3px; }
+        #planeArea .plane-propeller { position: absolute; width: 4px; height: 18px; background: #333; left: 50px; top: 16px; border-radius: 2px; animation: spin 0.1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #planeArea .pipe { position: absolute; width: 50px; background: #228B22; border-radius: 5px; }
+        #planeArea .ui { position: absolute; top: 10px; left: 10px; z-index: 10; }
+        #planeArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #planeArea .gameOver h1 { font-size: 32px; color: #e74c3c; }
+
+        /* Snake */
+        #snakeGame { display: none; width: 100%; height: 100%; position: absolute; background: #000; z-index: 100; }
+        #snakeArea { position: relative; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        #snakeBoard { position: relative; width: 360px; height: 360px; background: #111; border: 2px solid #333; display: block; }
+        #snakeBoard .snake-body { position: absolute; width: 16px; height: 16px; background: #0f0; border-radius: 2px; }
+        #snakeBoard .snake-food { position: absolute; width: 16px; height: 16px; background: #f00; border-radius: 50%; }
+        #snakeBoard .snake-special { position: absolute; width: 18px; height: 18px; background: #00f; border-radius: 50%; box-shadow: 0 0 8px #00f; animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
+        #snakeArea .ui { position: absolute; top: 10px; left: 10px; z-index: 10; color: #fff; font-size: 20px; }
+        #snakeArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #snakeArea .gameOver h1 { font-size: 32px; color: #0f0; }
+
+        .ui-box { background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 6px; color: #fff; font-size: 16px; display: inline-block; }
+        .score-val { color: #f1c40f; }
+
+        /* Bounce */
+        #bounceGame { display: none; width: 100%; height: 100%; position: absolute; background: #000; z-index: 100; }
+        #bounceArea { position: relative; width: 100%; height: 100%; background: #111; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        #bounceCanvas { background: #222; border: 2px solid #444; }
+        #bounceArea .ui { position: absolute; top: 10px; left: 10px; z-index: 10; color: #fff; font-size: 20px; }
+        #bounceArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #bounceArea .gameOver h1 { font-size: 32px; color: #e74c3c; }
+
+        #rotateMsg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a2e; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #rotateMsg h1 { font-size: 24px; }
+        #rotateMsg p { font-size: 16px; color: #aaa; }
+    </style>
+</head>
+<body>
+<div class="topnav">
+  <a href="index.html">Home</a>
+  <a href="paintings.html">Arts and Crafts</a>
+  <a href="stories.html">Stories</a>
+  <a href="codings.html">Codings</a>
+  <a class="active" href="arcade-game.html">Game</a>
+</div>
+    
+    <div id="menu">
+        <h1>ARCADE GAMES</h1>
+        <p>Choose a game</p>
+        <button class="game-btn car-btn" onclick="showGame('car')">🚗 Car Racer</button>
+        <button class="game-btn stack-btn" onclick="showGame('stack')">🧱 Block Match</button>
+        <button class="game-btn plane-btn" onclick="showGame('plane')">✈️ Flying Aeroplane</button>
+        <button class="game-btn snake-btn" onclick="showGame('snake')">🐍 Snake</button>
+        <button class="game-btn bounce-btn" onclick="showGame('bounce')">⚡ Ball Drop</button>
+    </div>
+
+    <div id="gameArea">
+        <button id="backBtn" onclick="goBack()">← Back</button>
+        
+        <div id="carGame">
+            <div id="road"></div>
+            <div id="carArea">
+                <div class="ui"><span class="ui-box">SCORE: <span class="score-val" id="score">0</span></span></div>
+                <div id="player" class="car" style="left:160px;top:520px;"><div class="car-body"><div class="car-hood"></div><div class="car-windshield"></div><div class="car-roof"></div><div class="car-headlight left"></div><div class="car-headlight right"></div></div></div>
+                <div id="ai1" class="car ai" style="display:none;"><div class="car-body"><div class="car-hood"></div><div class="car-windshield"></div><div class="car-roof"></div></div></div>
+                <div id="ai2" class="car ai purple" style="display:none;"><div class="car-body"><div class="car-hood"></div><div class="car-windshield"></div><div class="car-roof"></div></div></div>
+                <div class="gameOver" id="carGameOver"><h1>GAME OVER</h1><p>Score: <span id="finalScore">0</span></p><button class="restartBtn" onclick="restartCar()">PLAY AGAIN</button></div>
+                <div class="controls">Swipe left/right to move</div>
+            </div>
+        </div>
+
+        <div id="stackGame">
+            <div id="stackArea">
+                <div class="ui"><span id="sScore">0</span><span id="sHighScore">Best: 0</span></div>
+                <div id="grid"></div>
+                <div class="gameOver" id="sGameOver"><h1>GAME OVER</h1><p>Blocks: <span id="sFinalScore">0</span></p><button class="restart" onclick="restartStack()">PLAY AGAIN</button></div>
+                <div id="stackInstructions">←/→ to move, ↑ to rotate, ↓ for fast drop</div>
+            </div>
+        </div>
+
+        <div id="planeGame">
+            <div id="planeArea">
+                <div class="ui"><span class="ui-box">SCORE: <span class="score-val" id="planeScore">0</span></span><span class="ui-box" style="margin-left:10px">UP=tap to fly</span></div>
+                <div id="planeGameOver" class="gameOver"><h1>GAME OVER</h1><p>Score: <span id="planeFinalScore">0</span></p><button class="restartBtn" onclick="restartPlane()">PLAY AGAIN</button></div>
+            </div>
+        </div>
+
+        <div id="snakeGame">
+            <div id="snakeArea">
+                <div class="ui"><span class="ui-box">SCORE: <span class="score-val" id="snakeScore">0</span></span></div>
+                <div id="snakeBoard"></div>
+                <div id="snakeGameOver" class="gameOver"><h1>GAME OVER</h1><p>Score: <span id="snakeFinalScore">0</span></p><button class="restartBtn" onclick="restartSnake()">PLAY AGAIN</button></div>
+            </div>
+        </div>
+
+        <div id="bounceGame">
+            <div id="bounceArea">
+                <div class="ui"><span class="ui-box">SCORE: <span class="score-val" id="bounceScore">0</span></span><span class="ui-box" style="margin-left:10px">Arrow keys to move paddle</span></div>
+                <canvas id="bounceCanvas"></canvas>
+                <div id="bounceGameOver" class="gameOver"><h1>GAME OVER</h1><p>Score: <span id="bounceFinalScore">0</span></p><button class="restartBtn" onclick="restartBounce()">PLAY AGAIN</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var carScore = 0, carHighScore = 0;
+        var carLevel = 1, carSpeed = 5, carMaxObjects = 2, carGameTime = 0;
+        var playerX = 160, carObjects = [];
+        var carRunning = false;
+        var isPowered = false;
+        var stackScore = 0, stackHighScore = 0;
+        var stackGrid = [], stackBlockX = 3, stackBlockY = 0;
+        var stackCurrentShape = 0, stackRunning = false;
+        var carAnimId = null, stackAnimId = null;
+
+        var stackShapes = [
+            [[1,1,1,1]],
+            [[1,1],[1,1]],
+            [[0,1,0],[1,1,1]],
+            [[1,1,0],[0,1,1]],
+            [[0,1,1],[1,1,0]],
+            [[1,0],[1,0],[1,1]],
+            [[0,1],[0,1],[1,1]]
+        ];
+        var stackColors = ['#3498db','#e74c3c','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c'];
+        var dropInterval = 500, dropCounter = 0;
+
+        var touchStartX = 0;
+
+        function showGame(type) {
+            checkOrientation();
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('backBtn').style.display = 'block';
+            document.getElementById('carGame').style.display = 'none';
+            document.getElementById('stackGame').style.display = 'none';
+            document.getElementById('planeGame').style.display = 'none';
+            document.getElementById('snakeGame').style.display = 'none';
+            document.getElementById('bounceGame').style.display = 'none';
+            if (type === 'car') {
+                document.getElementById('carGame').style.display = 'block';
+                initCarGame();
+            } else if (type === 'stack') {
+                document.getElementById('stackGame').style.display = 'block';
+                initStackGame();
+            } else if (type === 'plane') {
+                document.getElementById('planeGame').style.display = 'block';
+                initPlane();
+            } else if (type === 'snake') {
+                document.getElementById('snakeGame').style.display = 'block';
+                initSnake();
+            } else if (type === 'bounce') {
+                document.getElementById('bounceGame').style.display = 'block';
+                initBounce();
+            }
+        }
+
+        function checkOrientation() {
+            var isLandscape = window.innerWidth > window.innerHeight;
+            document.getElementById('rotateMsg').style.display = isLandscape ? 'none' : 'flex';
+        }
+
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+
+        function goBack() {
+            carRunning = false;
+            stackRunning = false;
+            planeRunning = false;
+            snakeRunning = false;
+            bounceRunning = false;
+            paddleLeft = false;
+            paddleRight = false;
+            isPowered = false;
+            if (carAnimId) cancelAnimationFrame(carAnimId);
+            if (stackAnimId) cancelAnimationFrame(stackAnimId);
+            if (planeGame) cancelAnimationFrame(planeGame);
+            if (snakeInterval) clearInterval(snakeInterval);
+            if (bounceAnimFrame) cancelAnimationFrame(bounceAnimFrame);
+            document.getElementById('menu').style.display = 'block';
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('carGame').style.display = 'none';
+            document.getElementById('stackGame').style.display = 'none';
+            document.getElementById('planeGame').style.display = 'none';
+            document.getElementById('snakeGame').style.display = 'none';
+            document.getElementById('bounceGame').style.display = 'none';
+        }
+
+        function initCarGame() {
+            carScore = 0;
+            carLevel = 1;
+            carSpeed = 5;
+            carMaxObjects = 2;
+            carGameTime = 0;
+            playerX = 160;
+            isPowered = false;
+            document.getElementById('player').style.left = '160px';
+            document.getElementById('player').style.opacity = '1';
+            document.getElementById('player').classList.remove('powered');
+            document.getElementById('score').innerHTML = '0';
+            document.getElementById('carGameOver').style.display = 'none';
+            carObjects.forEach(function(o) { if (o.el && o.el.parentNode) o.el.remove(); });
+            carObjects = [];
+            aiCars.forEach(function(ai) { if (ai.el && ai.el.parentNode) ai.el.remove(); });
+            aiCars = [];
+            powerups.forEach(function(p) { if (p.el && p.el.parentNode) p.el.remove(); });
+            powerups = [];
+            carRunning = true;
+            if (carAnimId) cancelAnimationFrame(carAnimId);
+            carGameLoop();
+        }
+
+        function carGameLoop() {
+            if (!carRunning) return;
+            carGameTime++;
+            if (keys.a) playerX = Math.max(10, playerX - 10);
+            if (keys.d) playerX = Math.min(306, playerX + 10);
+            document.getElementById('player').style.left = playerX + 'px';
+            if (carGameTime % 15 === 0 && carObjects.length < carMaxObjects) {
+                spawnCarObject();
+            }
+            if (carGameTime % 300 === 0) {
+                carLevel++;
+                carMaxObjects = Math.min(14, 2 + carLevel * 3);
+                carSpeed = Math.min(12, 5 + carLevel);
+            }
+            if (carLevel >= 2 && carGameTime % 300 === 0) {
+                spawnAICar();
+                spawnAICar();
+            }
+            if (carLevel >= 3 && carGameTime % 500 === 0) spawnPowerup();
+            updateCarObjects();
+            updateAICars();
+            updatePowerups();
+            carAnimId = requestAnimationFrame(carGameLoop);
+        }
+
+        function spawnCarObject() {
+            var rand = Math.random();
+            var type = rand > 0.35 ? 'coin' : 'obstacle';
+            var obj = document.createElement('div');
+            obj.className = type;
+            var laneX = Math.floor(Math.random() * 8) * 40 + 10;
+            obj.style.left = laneX + 'px';
+            obj.style.top = '-40px';
+            document.getElementById('carArea').appendChild(obj);
+            carObjects.push({el: obj, y: -40, x: laneX, type: type});
+        }
+
+        var aiCars = [];
+        var aiCarIdCounter = 0;
+
+        function spawnAICar() {
+            var aiEl = document.getElementById('ai1').cloneNode(true);
+            aiEl.id = 'ai_car_' + aiCarIdCounter++;
+            aiEl.style.display = 'block';
+            aiEl.style.left = (Math.floor(Math.random() * 8) * 40 + 10) + 'px';
+            aiEl.style.top = '-80px';
+            document.getElementById('carArea').appendChild(aiEl);
+            aiCars.push({el: aiEl, y: -80, x: parseInt(aiEl.style.left)});
+        }
+
+        function updateAICars() {
+            var pRect = {x: playerX + 5, y: 520, w: 30, h: 55};
+            for (var i = aiCars.length - 1; i >= 0; i--) {
+                var ai = aiCars[i];
+                ai.y += carSpeed * 1.2;
+                ai.el.style.top = ai.y + 'px';
+                var aRect = {x: ai.x + 5, y: ai.y + 5, w: 30, h: 55};
+                if (!isPowered && pRect.x < aRect.x + aRect.w && pRect.x + pRect.w > aRect.x && pRect.y < aRect.y + aRect.h && pRect.y + pRect.h > aRect.y) {
+                    carEndGame();
+                }
+                if (ai.y > 680) {
+                    ai.el.remove();
+                    aiCars.splice(i, 1);
+                }
+            }
+        }
+
+        var powerups = [];
+        var powerupBlinkStart = 0;
+
+        function spawnPowerup() {
+            var obj = document.createElement('div');
+            obj.className = 'powerup';
+            var laneX = Math.floor(Math.random() * 8) * 40 + 10;
+            obj.style.left = laneX + 'px';
+            obj.style.top = '-40px';
+            document.getElementById('carArea').appendChild(obj);
+            powerups.push({el: obj, y: -40, x: laneX, blinking: false});
+        }
+
+        function updatePowerups() {
+            var pRect = {x: playerX + 5, y: 520, w: 30, h: 55};
+            for (var i = powerups.length - 1; i >= 0; i--) {
+                var pu = powerups[i];
+                pu.y += carSpeed;
+                pu.el.style.top = pu.y + 'px';
+                if (pu.y > 580 && !pu.blinking) {
+                    pu.blinking = true;
+                    powerupBlinkStart = pu.y;
+                }
+                if (pu.blinking) {
+                    pu.el.style.opacity = pu.y % 20 < 10 ? '1' : '0.3';
+                }
+                var pRect2 = {x: pu.x + 2, y: pu.y + 2, w: 20, h: 20};
+                if (pRect.x < pRect2.x + pRect2.w && pRect.x + pRect.w > pRect2.x && pRect.y < pRect2.y + pRect2.h && pRect.y + pRect.h > pRect2.y) {
+                    carSpeed = 15;
+                    isPowered = true;
+                    document.getElementById('player').classList.add('powered');
+                    setTimeout(function() {
+                        var blinkCount = 0;
+                        var blinkInterval = setInterval(function() {
+                            document.getElementById('player').style.opacity = blinkCount % 2 === 0 ? '0.5' : '1';
+                            blinkCount++;
+                            if (blinkCount >= 10) {
+                                clearInterval(blinkInterval);
+                                document.getElementById('player').style.opacity = '1';
+                                isPowered = false;
+                                document.getElementById('player').classList.remove('powered');
+                            }
+                        }, 100);
+                    }, 6000);
+                    pu.el.remove();
+                    powerups.splice(i, 1);
+                }
+                if (pu.y > 660) {
+                    pu.el.remove();
+                    powerups.splice(i, 1);
+                }
+            }
+        }
+
+        function updateCarObjects() {
+            var pRect = {x: playerX + 5, y: 520, w: 30, h: 55};
+            for (var i = carObjects.length - 1; i >= 0; i--) {
+                var obj = carObjects[i];
+                obj.y += carSpeed;
+                obj.el.style.top = obj.y + 'px';
+                var oRect = {x: obj.x + 2, y: obj.y + 2, w: 20, h: 20};
+                if (pRect.x < oRect.x + oRect.w && pRect.x + pRect.w > oRect.x && pRect.y < oRect.y + oRect.h && pRect.y + pRect.h > oRect.y) {
+                    if (obj.type === 'coin') {
+                        carScore += 10;
+                        document.getElementById('score').innerHTML = carScore;
+                        obj.el.remove();
+                        carObjects.splice(i, 1);
+                    } else if (!isPowered) {
+                        carEndGame();
+                    }
+                }
+                if (obj.y > 660) {
+                    obj.el.remove();
+                    carObjects.splice(i, 1);
+                }
+            }
+        }
+
+        function carEndGame() {
+            carRunning = false;
+            if (carScore > carHighScore) {
+                carHighScore = carScore;
+                localStorage.setItem('racerHigh', carHighScore);
+            }
+            document.getElementById('finalScore').innerHTML = carScore;
+            document.getElementById('carGameOver').style.display = 'flex';
+        }
+
+        function restartCar() {
+            initCarGame();
+        }
+
+        function initStackGame() {
+            stackGrid = [];
+            for (var r = 0; r < 18; r++) {
+                stackGrid[r] = [];
+                for (var c = 0; c < 10; c++) stackGrid[r][c] = 0;
+            }
+            var grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (var r = 0; r < 18; r++) {
+                for (var c = 0; c < 10; c++) {
+                    var cell = document.createElement('div');
+                    cell.id = 'cell_' + r + '_' + c;
+                    cell.className = 'cell';
+                    grid.appendChild(cell);
+                }
+            }
+            stackScore = 0;
+            document.getElementById('sScore').innerHTML = '0';
+            document.getElementById('sGameOver').style.display = 'none';
+            stackRunning = true;
+            if (stackAnimId) cancelAnimationFrame(stackAnimId);
+            spawnNewBlock();
+            stackGameLoop();
+        }
+
+        function spawnNewBlock() {
+            stackCurrentShape = Math.floor(Math.random() * stackShapes.length);
+            stackBlockX = 3;
+            stackBlockY = 0;
+            if (checkCollision(stackShapes[stackCurrentShape], stackBlockX, stackBlockY)) {
+                stackEndGame();
+            } else {
+                drawCurrentBlock(stackColors[stackCurrentShape]);
+            }
+        }
+
+        function checkCollision(shape, x, y) {
+            for (var r = 0; r < shape.length; r++) {
+                for (var c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c]) {
+                        var newX = x + c;
+                        var newY = y + r;
+                        if (newX < 0 || newX >= 10 || newY >= 18) return true;
+                        if (newY >= 0 && stackGrid[newY] && stackGrid[newY][newX]) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function drawCurrentBlock(color) {
+            var shape = stackShapes[stackCurrentShape];
+            for (var r = 0; r < shape.length; r++) {
+                for (var c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c]) {
+                        var cell = document.getElementById('cell_' + (stackBlockY + r) + '_' + (stackBlockX + c));
+                        if (cell) cell.style.background = color;
+                    }
+                }
+            }
+        }
+
+        function clearBlockDisplay() {
+            for (var r = 0; r < 18; r++) {
+                for (var c = 0; c < 10; c++) {
+                    var cell = document.getElementById('cell_' + r + '_' + c);
+                    if (cell && !stackGrid[r][c]) cell.style.background = 'transparent';
+                }
+            }
+        }
+
+        function lockBlock() {
+            var shape = stackShapes[stackCurrentShape];
+            var color = stackColors[stackCurrentShape];
+            for (var r = 0; r < shape.length; r++) {
+                for (var c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c]) {
+                        var gy = stackBlockY + r;
+                        var gx = stackBlockX + c;
+                        if (gy >= 0 && gy < 18 && gx >= 0 && gx < 10) {
+                            stackGrid[gy][gx] = color;
+                        }
+                    }
+                }
+            }
+            stackScore++;
+            document.getElementById('sScore').innerHTML = stackScore;
+            checkLines();
+            spawnNewBlock();
+        }
+
+        function checkLines() {
+            for (var r = 17; r >= 0; r--) {
+                var full = true;
+                for (var c = 0; c < 10; c++) if (!stackGrid[r][c]) { full = false; break; }
+                if (full) {
+                    for (var c = 0; c < 10; c++) stackGrid[r][c] = 0;
+                    for (var rr = r; rr > 0; rr--) {
+                        for (var c = 0; c < 10; c++) stackGrid[rr][c] = stackGrid[rr - 1][c];
+                    }
+                    for (var c = 0; c < 10; c++) stackGrid[0][c] = 0;
+                    r++;
+                }
+            }
+            for (var r = 0; r < 18; r++) {
+                for (var c = 0; c < 10; c++) {
+                    var cell = document.getElementById('cell_' + r + '_' + c);
+                    if (cell) cell.style.background = stackGrid[r][c] || 'transparent';
+                }
+            }
+            if (stackGrid[0].some(function(c) { return c !== 0; })) stackEndGame();
+        }
+
+        function stackGameLoop() {
+            if (!stackRunning) return;
+            dropCounter += 16;
+            if (dropCounter > dropInterval) {
+                dropCounter = 0;
+                if (!checkCollision(stackShapes[stackCurrentShape], stackBlockX, stackBlockY + 1)) {
+                    stackBlockY++;
+                } else {
+                    lockBlock();
+                    if (!stackRunning) return;
+                }
+            }
+            clearBlockDisplay();
+            drawCurrentBlock(stackColors[stackCurrentShape]);
+            stackAnimId = requestAnimationFrame(stackGameLoop);
+        }
+
+        function stackEndGame() {
+            stackRunning = false;
+            if (stackScore > stackHighScore) {
+                stackHighScore = stackScore;
+                localStorage.setItem('stackHigh', stackHighScore);
+            }
+            document.getElementById('sFinalScore').innerHTML = stackScore;
+            document.getElementById('sGameOver').style.display = 'flex';
+        }
+
+        function restartStack() {
+            initStackGame();
+        }
+
+        function moveStack(dx) {
+            if (!stackRunning) return;
+            if (!checkCollision(stackShapes[stackCurrentShape], stackBlockX + dx, stackBlockY)) {
+                stackBlockX += dx;
+            }
+        }
+
+        function rotateStack() {
+            if (!stackRunning) return;
+            var shape = stackShapes[stackCurrentShape];
+            var newShape = shape[0].map(function(_, i) { return shape.map(function(row) { return row[i]; }).reverse(); });
+            if (!checkCollision(newShape, stackBlockX, stackBlockY)) {
+                stackShapes[stackCurrentShape] = newShape;
+            }
+        }
+
+        function dropStackFast() {
+            if (!stackRunning) return;
+            while (!checkCollision(stackShapes[stackCurrentShape], stackBlockX, stackBlockY + 1)) {
+                stackBlockY++;
+            }
+            clearBlockDisplay();
+            drawCurrentBlock(stackColors[stackCurrentShape]);
+            lockBlock();
+        }
+
+        var keys = {a: false, d: false};
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') { keys.a = true; e.preventDefault(); }
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') { keys.d = true; e.preventDefault(); }
+            if (e.key === 'ArrowLeft') { moveStack(-1); e.preventDefault(); }
+            if (e.key === 'ArrowRight') { moveStack(1); e.preventDefault(); }
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') { rotateStack(); e.preventDefault(); }
+            if (e.key === 'ArrowDown') { dropStackFast(); e.preventDefault(); }
+        });
+
+        document.addEventListener('keyup', function(e) {
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') keys.a = false;
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') keys.d = false;
+        });
+
+        document.getElementById('carArea').addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+        });
+        document.getElementById('carArea').addEventListener('touchend', function(e) {
+            var delta = e.changedTouches[0].clientX - touchStartX;
+            if (delta < -30) keys.a = true, setTimeout(function() { keys.a = false; }, 200);
+            if (delta > 30) keys.d = true, setTimeout(function() { keys.d = false; }, 200);
+        });
+
+        document.getElementById('stackArea').addEventListener('touchstart', function(e) {
+            if (!stackRunning) return;
+            var x = e.touches[0].clientX;
+            if (x < window.innerWidth / 2) moveStack(-1);
+            else moveStack(1);
+        });
+
+// ============ FLYING AEROPLANE ============
+        var planeGame = null;
+        var planeScore = 0;
+        var planePlayer = {x: 80, y: 300, vy: 0};
+        var planePipes = [];
+        var planeRunning = false;
+        var planeSpeed = 3;
+
+        function initPlane() {
+            var area = document.getElementById('planeArea');
+            area.querySelectorAll('.plane, .pipe').forEach(function(el) { el.remove(); });
+            planePipes = [];
+            planeScore = 0;
+            planeSpeed = 2;
+            document.getElementById('planeScore').innerHTML = '0';
+            document.getElementById('planeGameOver').style.display = 'none';
+            
+            planePlayer = {x: 80, y: 300, vy: 0};
+            
+            var player = document.createElement('div');
+            player.className = 'plane';
+            player.id = 'planePlayer';
+            player.style.left = '80px';
+            player.style.top = '300px';
+            
+            var body = document.createElement('div');
+            body.className = 'plane-body';
+            player.appendChild(body);
+            
+            var wing = document.createElement('div');
+            wing.className = 'plane-wing';
+            player.appendChild(wing);
+            
+            var wingBottom = document.createElement('div');
+            wingBottom.className = 'plane-wing-bottom';
+            player.appendChild(wingBottom);
+            
+            var tail = document.createElement('div');
+            tail.className = 'plane-tail';
+            player.appendChild(tail);
+            
+            var prop = document.createElement('div');
+            prop.className = 'plane-propeller';
+            player.appendChild(prop);
+            
+            area.appendChild(player);
+            
+            planeRunning = true;
+            if (planeGame) cancelAnimationFrame(planeGame);
+            updatePlane();
+        }
+
+        function createPipe() {
+            var gap = 180;
+            var gapY = 80 + Math.random() * 280;
+            var area = document.getElementById('planeArea');
+            
+            var topPipe = document.createElement('div');
+            topPipe.className = 'pipe';
+            topPipe.style.left = '420px';
+            topPipe.style.top = '0px';
+            topPipe.style.width = '50px';
+            topPipe.style.height = gapY + 'px';
+            area.appendChild(topPipe);
+            
+            var bottomPipe = document.createElement('div');
+            bottomPipe.className = 'pipe';
+            bottomPipe.style.left = '420px';
+            bottomPipe.style.top = (gapY + gap) + 'px';
+            bottomPipe.style.width = '50px';
+            bottomPipe.style.height = (600 - gapY - gap) + 'px';
+            area.appendChild(bottomPipe);
+            
+            planePipes.push({x: 420, gapY: gapY, gap: gap, topEl: topPipe, bottomEl: bottomPipe});
+        }
+
+        function updatePlane() {
+            if (!planeRunning) return;
+            
+            planeScore++;
+            document.getElementById('planeScore').innerHTML = planeScore;
+            
+            planeSpeed += 0.001;
+            if (planeSpeed > 7) planeSpeed = 7;
+            
+            planePlayer.vy += 0.25;
+            if (planePlayer.vy > 6) planePlayer.vy = 6;
+            planePlayer.vy += 0.4;
+            if (planePlayer.vy > 8) planePlayer.vy = 8;
+            
+            planePlayer.y += planePlayer.vy;
+            
+            if (planePlayer.y < 0 || planePlayer.y > 560) {
+                endPlane();
+                return;
+            }
+            
+            for (var i = 0; i < planePipes.length; i++) {
+                planePipes[i].x -= planeSpeed;
+                planePipes[i].topEl.style.left = planePipes[i].x + 'px';
+                planePipes[i].bottomEl.style.left = planePipes[i].x + 'px';
+                
+                if (planePlayer.x + 40 > planePipes[i].x && planePlayer.x < planePipes[i].x + 50) {
+                    if (planePlayer.y < planePipes[i].gapY || planePlayer.y + 25 > planePipes[i].gapY + planePipes[i].gap) {
+                        endPlane();
+                        return;
+                    }
+                }
+                
+                if (planePipes[i].x < -50) {
+                    planePipes[i].topEl.remove();
+                    planePipes[i].bottomEl.remove();
+                    planePipes.splice(i, 1);
+                    i--;
+                }
+            }
+
+            var canSpawn = true;
+            if (planePipes.length > 0) {
+                var lastPipe = planePipes[planePipes.length - 1];
+                if (lastPipe.x > 120) canSpawn = false;
+            }
+            if (canSpawn && Math.random() < 0.02) {
+                createPipe();
+            }
+            
+            var playerEl = document.getElementById('planePlayer');
+            if (playerEl) {
+                playerEl.style.top = planePlayer.y + 'px';
+            }
+            
+            planeGame = requestAnimationFrame(updatePlane);
+        }
+
+        function endPlane() {
+            planeRunning = false;
+            if (planeGame) cancelAnimationFrame(planeGame);
+            document.getElementById('planeFinalScore').innerHTML = planeScore;
+            document.getElementById('planeGameOver').style.display = 'flex';
+        }
+
+        function restartPlane() {
+            initPlane();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp' || e.key === ' ') && planeRunning) {
+                planePlayer.vy = -8;
+            }
+        });
+
+        document.getElementById('planeArea').addEventListener('touchstart', function(e) {
+            if (!planeRunning) return;
+            planePlayer.vy = -7;
+        });
+
+        checkOrientation();
+
+        // ============ SNAKE GAME ============
+        var snakeInterval = null;
+        var snakeScore = 0;
+        var snake = [{x: 10, y: 10}];
+        var snakeFood = {x: 15, y: 15};
+        var snakeSpecial = null;
+        var snakeDir = {x: 1, y: 0};
+        var snakeNextDir = {x: 1, y: 0};
+        var snakeRunning = false;
+
+        function initSnake() {
+            var board = document.getElementById('snakeBoard');
+            board.innerHTML = '';
+            snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
+            snakeDir = {x: 1, y: 0};
+            snakeNextDir = {x: 1, y: 0};
+            snakeScore = 0;
+            document.getElementById('snakeScore').innerHTML = '0';
+            document.getElementById('snakeGameOver').style.display = 'none';
+            
+            spawnFood();
+            renderSnake();
+            
+            snakeRunning = true;
+            if (snakeInterval) clearInterval(snakeInterval);
+            snakeInterval = setInterval(updateSnake, 150);
+        }
+
+        function renderSnake() {
+            var board = document.getElementById('snakeBoard');
+            board.innerHTML = '';
+            
+            for (var i = 0; i < snake.length; i++) {
+                var cell = document.createElement('div');
+                cell.className = 'snake-body';
+                cell.style.left = (snake[i].x * 18 - 18) + 'px';
+                cell.style.top = (snake[i].y * 18 - 18) + 'px';
+                board.appendChild(cell);
+            }
+            
+            if (snakeFood && snakeFood.x !== undefined) {
+                var food = document.createElement('div');
+                food.className = 'snake-food';
+                food.style.left = (snakeFood.x * 18 - 18) + 'px';
+                food.style.top = (snakeFood.y * 18 - 18) + 'px';
+                board.appendChild(food);
+            }
+            if (snakeSpecial) {
+                var special = document.createElement('div');
+                special.className = 'snake-special';
+                special.style.left = (snakeSpecial.x * 18 - 18) + 'px';
+                special.style.top = (snakeSpecial.y * 18 - 18) + 'px';
+                board.appendChild(special);
+            }
+        }
+
+        function spawnFood() {
+            var valid = false;
+            var attempts = 0;
+            while (!valid && attempts < 1000) {
+                var nx = 1 + Math.floor(Math.random() * 20);
+                var ny = 1 + Math.floor(Math.random() * 20);
+                var conflict = false;
+                for (var i = 0; i < snake.length; i++) {
+                    if (snake[i].x === nx && snake[i].y === ny) {
+                        conflict = true;
+                        break;
+                    }
+                }
+                if (!conflict) {
+                    snakeFood = {x: nx, y: ny};
+                    valid = true;
+                }
+                attempts++;
+            }
+        }
+
+        function spawnSpecial() {
+            var valid = false;
+            var attempts = 0;
+            while (!valid && attempts < 1000) {
+                var nx = 1 + Math.floor(Math.random() * 20);
+                var ny = 1 + Math.floor(Math.random() * 20);
+                var conflict = false;
+                for (var i = 0; i < snake.length; i++) {
+                    if (snake[i].x === nx && snake[i].y === ny) {
+                        conflict = true;
+                        break;
+                    }
+                }
+                if (!conflict && (snakeFood.x !== nx || snakeFood.y !== ny)) {
+                    snakeSpecial = {x: nx, y: ny};
+                    valid = true;
+                }
+                attempts++;
+            }
+        }
+
+        function updateSnake() {
+            if (!snakeRunning) return;
+            
+            snakeDir = {...snakeNextDir};
+            
+            var head = {x: snake[0].x + snakeDir.x, y: snake[0].y + snakeDir.y};
+            
+            if (head.x < 1) head.x = 20;
+            if (head.x > 20) head.x = 1;
+            if (head.y < 1) head.y = 20;
+            if (head.y > 20) head.y = 1;
+            
+            for (var i = 0; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    endSnake();
+                    return;
+                }
+            }
+            
+            snake.unshift(head);
+            
+            if (head.x === snakeFood.x && head.y === snakeFood.y) {
+                snakeScore += 10;
+                document.getElementById('snakeScore').innerHTML = snakeScore;
+                spawnFood();
+                if (Math.random() < 0.2 && !snakeSpecial) {
+                    spawnSpecial();
+                }
+            } else if (snakeSpecial && head.x === snakeSpecial.x && head.y === snakeSpecial.y) {
+                snakeScore += 50;
+                document.getElementById('snakeScore').innerHTML = snakeScore;
+                for (var g = 0; g < 5; g++) {
+                    snake.push({...snake[snake.length - 1]});
+                }
+                snakeSpecial = null;
+            } else {
+                snake.pop();
+            }
+            
+            renderSnake();
+        }
+
+        function endSnake() {
+            snakeRunning = false;
+            if (snakeInterval) clearInterval(snakeInterval);
+            document.getElementById('snakeFinalScore').innerHTML = snakeScore;
+            document.getElementById('snakeGameOver').style.display = 'flex';
+        }
+
+        function restartSnake() {
+            if (snakeInterval) clearInterval(snakeInterval);
+            snakeRunning = false;
+            setTimeout(initSnake, 100);
+        }
+
+        function initSnake() {
+            var board = document.getElementById('snakeBoard');
+            var gameOver = document.getElementById('snakeGameOver');
+            board.innerHTML = '';
+            gameOver.style.display = 'none';
+            snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
+            snakeDir = {x: 1, y: 0};
+            snakeNextDir = {x: 1, y: 0};
+            snakeScore = 0;
+            snakeSpecial = null;
+            document.getElementById('snakeScore').innerHTML = '0';
+            
+            spawnFood();
+            renderSnake();
+            
+            snakeRunning = true;
+            if (snakeInterval) clearInterval(snakeInterval);
+            snakeInterval = setInterval(updateSnake, 150);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (!snakeRunning) return;
+            if (e.key === 'ArrowUp' && snakeDir.y !== 1) snakeNextDir = {x: 0, y: -1};
+            if (e.key === 'ArrowDown' && snakeDir.y !== -1) snakeNextDir = {x: 0, y: 1};
+            if (e.key === 'ArrowLeft' && snakeDir.x !== 1) snakeNextDir = {x: -1, y: 0};
+            if (e.key === 'ArrowRight' && snakeDir.x !== -1) snakeNextDir = {x: 1, y: 0};
+        });
+
+        document.getElementById('snakeArea').addEventListener('touchstart', function(e) {
+            if (!snakeRunning) return;
+            var y = e.touches[0].clientY;
+            if (y < window.innerHeight / 3 && snakeDir.y !== 1) snakeNextDir = {x: 0, y: -1};
+            else if (y > window.innerHeight * 2/3 && snakeDir.y !== -1) snakeNextDir = {x: 0, y: 1};
+            else if (e.touches[0].clientX < window.innerWidth / 2 && snakeDir.x !== 1) snakeNextDir = {x: -1, y: 0};
+            else if (snakeDir.x !== -1) snakeNextDir = {x: 1, y: 0};
+        });
+
+        // Bounce Game
+        var bounceScore = 0;
+        var bounceCanvas, bounceCtx;
+        var paddleX, paddleY, paddleWidth, paddleHeight;
+        var ballX, ballY, ballRadius, ballSpeedX, ballSpeedY;
+        var coins = [];
+        var bounceRunning = false;
+        var bounceAnimFrame;
+        var paddleLeft = false, paddleRight = false;
+        var paddleSpeed = 12;
+
+        function initBounce() {
+            bounceCanvas = document.getElementById('bounceCanvas');
+            bounceCtx = bounceCanvas.getContext('2d');
+            
+            var area = document.getElementById('bounceArea');
+            bounceCanvas.width = Math.min(600, area.clientWidth - 20);
+            bounceCanvas.height = Math.min(500, area.clientHeight - 80);
+            
+            paddleWidth = 100;
+            paddleHeight = 15;
+            paddleX = (bounceCanvas.width - paddleWidth) / 2;
+            paddleY = bounceCanvas.height - 30;
+            
+            ballRadius = 10;
+            ballX = bounceCanvas.width / 2;
+            ballY = bounceCanvas.height / 2;
+            ballSpeedX = 10 * (Math.random() > 0.5 ? 1 : -1);
+            ballSpeedY = -10;
+            
+            coins = [];
+            spawnCoin();
+            spawnCoin();
+            spawnCoin();
+            
+            bounceScore = 0;
+            paddleLeft = false;
+            paddleRight = false;
+            document.getElementById('bounceScore').innerHTML = '0';
+            document.getElementById('bounceGameOver').style.display = 'none';
+            
+            bounceRunning = true;
+            if (bounceAnimFrame) cancelAnimationFrame(bounceAnimFrame);
+            gameLoopBounce();
+        }
+
+        function spawnCoin() {
+            coins.push({
+                x: 30 + Math.random() * (bounceCanvas.width - 60),
+                y: 30 + Math.random() * (bounceCanvas.height * 0.5),
+                radius: 12
+            });
+        }
+
+        function gameLoopBounce() {
+            if (!bounceRunning) return;
+            
+            bounceCtx.clearRect(0, 0, bounceCanvas.width, bounceCanvas.height);
+            
+            if (paddleLeft) {
+                paddleX -= paddleSpeed;
+                if (paddleX < 0) paddleX = 0;
+            }
+            if (paddleRight) {
+                paddleX += paddleSpeed;
+                if (paddleX + paddleWidth > bounceCanvas.width) paddleX = bounceCanvas.width - paddleWidth;
+            }
+            
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+            
+            if (ballX - ballRadius <= 0 || ballX + ballRadius >= bounceCanvas.width) ballSpeedX = -ballSpeedX;
+            if (ballY - ballRadius <= 0) ballSpeedY = -ballSpeedY;
+            
+            if (ballY + ballRadius >= bounceCanvas.height) {
+                endBounce();
+                return;
+            }
+            
+            if (ballY + ballRadius >= paddleY && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
+                ballSpeedY = -Math.abs(ballSpeedY);
+                var hitPos = (ballX - paddleX) / paddleWidth;
+                ballSpeedX = 8 * (hitPos - 0.5);
+            }
+            
+            for (var i = coins.length - 1; i >= 0; i--) {
+                var coin = coins[i];
+                var dx = ballX - coin.x;
+                var dy = ballY - coin.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < ballRadius + coin.radius) {
+                    bounceScore += 10;
+                    document.getElementById('bounceScore').innerHTML = bounceScore;
+                    coins.splice(i, 1);
+                    spawnCoin();
+                    if (Math.random() < 0.3) spawnCoin();
+                } else {
+                    bounceCtx.beginPath();
+                    bounceCtx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
+                    bounceCtx.fillStyle = '#f1c40f';
+                    bounceCtx.fill();
+                    bounceCtx.strokeStyle = '#d4ac0d';
+                    bounceCtx.lineWidth = 2;
+                    bounceCtx.stroke();
+                    bounceCtx.fillStyle = '#fff';
+                    bounceCtx.font = '14px Arial';
+                    bounceCtx.textAlign = 'center';
+                    bounceCtx.fillText('$', coin.x, coin.y + 5);
+                    bounceCtx.closePath();
+                }
+            }
+            
+            bounceCtx.beginPath();
+            bounceCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            bounceCtx.fillStyle = '#e74c3c';
+            bounceCtx.fill();
+            bounceCtx.closePath();
+            
+            bounceCtx.fillStyle = '#3498db';
+            bounceCtx.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
+            
+            bounceAnimFrame = requestAnimationFrame(gameLoopBounce);
+        }
+
+        function endBounce() {
+            bounceRunning = false;
+            paddleLeft = false;
+            paddleRight = false;
+            if (bounceAnimFrame) cancelAnimationFrame(bounceAnimFrame);
+            document.getElementById('bounceFinalScore').innerHTML = bounceScore;
+            document.getElementById('bounceGameOver').style.display = 'flex';
+        }
+
+        function restartBounce() {
+            initBounce();
+        }
+
+        bounceCanvas = document.getElementById('bounceCanvas');
+        if (bounceCanvas) {
+            bounceCanvas.addEventListener('mousemove', function(e) {
+                var rect = bounceCanvas.getBoundingClientRect();
+                paddleX = e.clientX - rect.left - paddleWidth / 2;
+                if (paddleX < 0) paddleX = 0;
+                if (paddleX + paddleWidth > bounceCanvas.width) paddleX = bounceCanvas.width - paddleWidth;
+            });
+            
+            bounceCanvas.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                var rect = bounceCanvas.getBoundingClientRect();
+                paddleX = e.touches[0].clientX - rect.left - paddleWidth / 2;
+                if (paddleX < 0) paddleX = 0;
+                if (paddleX + paddleWidth > bounceCanvas.width) paddleX = bounceCanvas.width - paddleWidth;
+            }, { passive: false });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (!bounceRunning) return;
+            if (e.key === 'ArrowLeft') paddleLeft = true;
+            if (e.key === 'ArrowRight') paddleRight = true;
+        });
+
+        document.addEventListener('keyup', function(e) {
+            if (e.key === 'ArrowLeft') paddleLeft = false;
+            if (e.key === 'ArrowRight') paddleRight = false;
+        });
+    </script>
+</body>
+</html>
