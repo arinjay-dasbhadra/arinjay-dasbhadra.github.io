@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Games</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+        }
+        #menu { text-align: center; }
+        h1 { color: #ff6b6b; font-size: 36px; margin: 20px 0; text-shadow: 0 0 20px #ff6b6b; }
+        p { color: #888; margin-bottom: 30px; }
+        .game-btn {
+            display: block;
+            width: 280px;
+            padding: 20px;
+            margin: 15px auto;
+            font-size: 20px;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            line-height: 1.2;
+        }
+        .car-btn { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .stack-btn { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .plane-btn { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .snake-btn { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .bounce-btn { background: linear-gradient(135deg, #222, #000); }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h1>ARCADE GAMES</h1>
+        <p>Choose a game</p>
+        <a href="carracer.html" class="game-btn car-btn">Car Racer</a>
+        <a href="blockmatch.html" class="game-btn stack-btn">Block Match</a>
+        <a href="flyingaeroplane.html" class="game-btn plane-btn">Flying Aeroplane</a>
+        <a href="snake.html" class="game-btn snake-btn">Snake</a>
+        <a href="balldrop.html" class="game-btn bounce-btn">Ball Drop</a>
+    </div>
+</body>
+</html>
