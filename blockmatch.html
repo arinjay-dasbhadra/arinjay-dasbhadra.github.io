@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Match</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        #gameArea {
+            width: 360px;
+            height: 640px;
+            background: #1a1a2e;
+            border: 4px solid #ff6b6b;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        #backBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        #stackGame { width: 100%; height: 100%; position: absolute; background: #16213e; }
+        #stackArea { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #stackArea .ui { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; color: #fff; font-size: 16px; z-index: 10; }
+        #grid { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); width: 280px; height: 504px; display: grid; grid-template-columns: repeat(10,28px); grid-template-rows: repeat(18,28px); gap: 1px; background: #0a0a15; }
+        .cell { width: 28px; height: 28px; background: transparent; }
+        #stackArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #stackArea .gameOver h1 { font-size: 32px; color: #e74c3c; }
+        #stackArea .gameOver p { font-size: 18px; margin: 15px 0; }
+        .restart { padding: 12px 30px; font-size: 18px; background: #3498db; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        #stackInstructions { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <a href="arcadeindex.html" id="backBtn">&#8592; Menu</a>
+        <div id="stackGame">
+            <div id="stackArea">
+                <div class="ui"><span id="sScore">0</span><span id="sHighScore">Best: 0</span></div>
+                <div id="grid"></div>
+                <div class="gameOver" id="sGameOver"><h1>GAME OVER</h1><p>Blocks: <span id="sFinalScore">0</span></p><button class="restart" onclick="restartStack()">PLAY AGAIN</button></div>
+                <div id="stackInstructions">Arrow keys to play</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var stackScore = 0, stackHighScore = 0;
+        var stackGrid = [], stackBlockX = 3, stackBlockY = 0;
+        var stackCurrentShape = 0, stackRunning = false;
+        var stackAnimId = null;
+        var dropInterval = 500, dropCounter = 0;
+
+        var stackShapes = [
+            [[1,1,1,1]],
+            [[1,1],[1,1]],
+            [[0,1,0],[1,1,1]],
+            [[1,1,0],[0,1,1]],
+            [[0,1,1],[1,1,0]],
+            [[1,0],[1,0],[1,1]],
+            [[0,1],[0,1],[1,1]]
+        ];
+        var stackColors = ['#3498db','#e74c3c','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c'];
+
+        function initStackGame() {
+            stackGrid = [];
+            for (var r = 0; r < 18; r++) { stackGrid[r] = []; for (var c = 0; c < 10; c++) stackGrid[r][c] = 0; }
+            var grid = document.getElementById('grid'); grid.innerHTML = '';
+            for (var r = 0; r < 18; r++) {
+                for (var c = 0; c < 10; c++) {
+                    var cell = document.createElement('div');
+                    cell.id = 'cell_' + r + '_' + c; cell.className = 'cell';
+                    grid.appendChild(cell);
+                }
+            }
+            stackScore = 0; document.getElementById('sScore').innerHTML = '0';
+            document.getElementById('sGameOver').style.display = 'none';
+            stackRunning = true;
+            if (stackAnimId) cancelAnimationFrame(stackAnimId);
+            spawnNewBlock(); stackGameLoop();
+        }
+
+        function spawnNewBlock() {
+            stackCurrentShape = Math.floor(Math.random() * stackShapes.length);
+            stackBlockX = 3; stackBlockY = 0;
+            if (checkCollision(stackShapes[stackCurrentShape], stackBlockX, stackBlockY)) { stackEndGame(); }
+            else { drawCurrentBlock(stackColors[stackCurrentShape]); }
+        }
+
+        function checkCollision(shape, x, y) {
+            for (var r = 0; r < shape.length; r++) {
+                for (var c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c]) {
+                        var newX = x + c, newY = y + r;
+                        if (newX < 0 || newX >= 10 || newY >= 18) return true;
+                        if (newY >= 0 && stackGrid[newY] && stackGrid[newY][newX]) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function drawCurrentBlock(color) {
+            var shape = stackShapes[stackCurrentShape];
+            for (var r = 0; r < shape.length; r++) {
+                for (var c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c]) {
+                        var cell = document.getElementById('cell_' + (stackBlockY + r) + '_' + (stackBlockX + c));
+                        if (cell) cell.style.background = color;
+                    }
+                }
+            }
+        }
+
+        function clearBlockDisplay() {
+            for (var r = 0; r < 18; r++) {
+                for (var c = 0; c < 10; c++) {
+                    var cell = document.getElementById('cell_' + r + '_' + c);
+                    if (cell && !stackGrid[r][c]) cell.style.background = 'transparent';
+                }
+            }
+        }
+
+        function lockBlock() {
+            var shape = stackShapes[stackCurrentShape];
+            var color = stackColors[stackCurrentShape];
+            for (var r = 0; r < shape.length; r++) {
+                for (var c = 0; c < shape[r].length; c++) {
+                    if (shape[r][c]) {
+                        var gy = stackBlockY + r, gx = stackBlockX + c;
+                        if (gy >= 0 && gy < 18 && gx >= 0 && gx < 10) stackGrid[gy][gx] = color;
+                    }
+                }
+            }
+            stackScore++; document.getElementById('sScore').innerHTML = stackScore;
+            checkLines(); spawnNewBlock();
+        }
+
+        function checkLines() {
+            for (var r = 17; r >= 0; r--) {
+                var full = true;
+                for (var c = 0; c < 10; c++) if (!stackGrid[r][c]) { full = false; break; }
+                if (full) {
+                    for (var c = 0; c < 10; c++) stackGrid[r][c] = 0;
+                    for (var rr = r; rr > 0; rr--) { for (var c = 0; c < 10; c++) stackGrid[rr][c] = stackGrid[rr - 1][c]; }
+                    for (var c = 0; c < 10; c++) stackGrid[0][c] = 0;
+                    r++;
+                }
+            }
+            for (var r = 0; r < 18; r++) {
+                for (var c = 0; c < 10; c++) {
+                    var cell = document.getElementById('cell_' + r + '_' + c);
+                    if (cell) cell.style.background = stackGrid[r][c] || 'transparent';
+                }
+            }
+            if (stackGrid[0].some(function(c) { return c !== 0; })) stackEndGame();
+        }
+
+        function stackGameLoop() {
+            if (!stackRunning) return;
+            dropCounter += 16;
+            if (dropCounter > dropInterval) {
+                dropCounter = 0;
+                if (!checkCollision(stackShapes[stackCurrentShape], stackBlockX, stackBlockY + 1)) { stackBlockY++; }
+                else { lockBlock(); if (!stackRunning) return; }
+            }
+            clearBlockDisplay(); drawCurrentBlock(stackColors[stackCurrentShape]);
+            stackAnimId = requestAnimationFrame(stackGameLoop);
+        }
+
+        function stackEndGame() {
+            stackRunning = false;
+            if (stackScore > stackHighScore) { stackHighScore = stackScore; localStorage.setItem('stackHigh', stackHighScore); }
+            document.getElementById('sFinalScore').innerHTML = stackScore;
+            document.getElementById('sGameOver').style.display = 'flex';
+        }
+
+        function restartStack() { initStackGame(); }
+
+        function moveStack(dx) {
+            if (!stackRunning) return;
+            if (!checkCollision(stackShapes[stackCurrentShape], stackBlockX + dx, stackBlockY)) stackBlockX += dx;
+        }
+
+        function rotateStack() {
+            if (!stackRunning) return;
+            var shape = stackShapes[stackCurrentShape];
+            var newShape = shape[0].map(function(_, i) { return shape.map(function(row) { return row[i]; }).reverse(); });
+            if (!checkCollision(newShape, stackBlockX, stackBlockY)) stackShapes[stackCurrentShape] = newShape;
+        }
+
+        function dropStackFast() {
+            if (!stackRunning) return;
+            while (!checkCollision(stackShapes[stackCurrentShape], stackBlockX, stackBlockY + 1)) stackBlockY++;
+            clearBlockDisplay(); drawCurrentBlock(stackColors[stackCurrentShape]); lockBlock();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') { moveStack(-1); e.preventDefault(); }
+            if (e.key === 'ArrowRight') { moveStack(1); e.preventDefault(); }
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') { rotateStack(); e.preventDefault(); }
+            if (e.key === 'ArrowDown') { dropStackFast(); e.preventDefault(); }
+        });
+
+        document.getElementById('stackArea').addEventListener('touchstart', function(e) {
+            if (!stackRunning) return;
+            var x = e.touches[0].clientX;
+            if (x < window.innerWidth / 2) moveStack(-1); else moveStack(1);
+        });
+
+        initStackGame();
+    </script>
+</body>
+</html>
