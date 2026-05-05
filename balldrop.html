@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ball Drop</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        #gameArea {
+            width: 360px;
+            height: 640px;
+            background: #1a1a2e;
+            border: 4px solid #ff6b6b;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        #backBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        #bounceGame { width: 100%; height: 100%; position: absolute; background: #000; z-index: 100; }
+        #bounceArea { position: relative; width: 100%; height: 100%; background: #111; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        #bounceCanvas { background: #222; border: 2px solid #444; }
+        #bounceArea .ui { position: absolute; top: 10px; left: 10px; z-index: 10; color: #fff; font-size: 20px; }
+        .ui-box { background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 6px; color: #fff; font-size: 16px; display: inline-block; }
+        .score-val { color: #f1c40f; }
+        #bounceArea .gameOver { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20; justify-content: center; align-items: center; flex-direction: column; color: #fff; }
+        #bounceArea .gameOver h1 { font-size: 32px; color: #e74c3c; }
+        .restartBtn { padding: 12px 30px; font-size: 18px; background: #ff6b6b; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <a href="arcadeindex.html" id="backBtn">&#8592; Menu</a>
+        <div id="bounceGame">
+            <div id="bounceArea">
+                <div class="ui"><span class="ui-box">SCORE: <span class="score-val" id="bounceScore">0</span></span><span class="ui-box" style="margin-left:10px">Arrow keys to move paddle</span></div>
+                <canvas id="bounceCanvas"></canvas>
+                <div id="bounceGameOver" class="gameOver"><h1>GAME OVER</h1><p>Score: <span id="bounceFinalScore">0</span></p><button class="restartBtn" onclick="restartBounce()">PLAY AGAIN</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var bounceScore = 0;
+        var bounceCanvas, bounceCtx;
+        var paddleX, paddleY, paddleWidth, paddleHeight;
+        var ballX, ballY, ballRadius, ballSpeedX, ballSpeedY;
+        var coins = [];
+        var bounceRunning = false;
+        var bounceAnimFrame;
+        var paddleLeft = false, paddleRight = false;
+        var paddleSpeed = 12;
+
+        function initBounce() {
+            bounceCanvas = document.getElementById('bounceCanvas');
+            bounceCtx = bounceCanvas.getContext('2d');
+            var area = document.getElementById('bounceArea');
+            bounceCanvas.width = Math.min(600, area.clientWidth - 20);
+            bounceCanvas.height = Math.min(500, area.clientHeight - 80);
+            paddleWidth = 100; paddleHeight = 15;
+            paddleX = (bounceCanvas.width - paddleWidth) / 2;
+            paddleY = bounceCanvas.height - 30;
+            ballRadius = 10; ballX = bounceCanvas.width / 2; ballY = bounceCanvas.height / 2;
+            ballSpeedX = 10 * (Math.random() > 0.5 ? 1 : -1); ballSpeedY = -10;
+            coins = []; spawnCoin(); spawnCoin(); spawnCoin();
+            bounceScore = 0; paddleLeft = false; paddleRight = false;
+            document.getElementById('bounceScore').innerHTML = '0';
+            document.getElementById('bounceGameOver').style.display = 'none';
+            bounceRunning = true;
+            if (bounceAnimFrame) cancelAnimationFrame(bounceAnimFrame);
+            gameLoopBounce();
+        }
+
+        function spawnCoin() {
+            coins.push({
+                x: 30 + Math.random() * (bounceCanvas.width - 60),
+                y: 30 + Math.random() * (bounceCanvas.height * 0.5),
+                radius: 12
+            });
+        }
+
+        function gameLoopBounce() {
+            if (!bounceRunning) return;
+            bounceCtx.clearRect(0, 0, bounceCanvas.width, bounceCanvas.height);
+            if (paddleLeft) { paddleX -= paddleSpeed; if (paddleX < 0) paddleX = 0; }
+            if (paddleRight) { paddleX += paddleSpeed; if (paddleX + paddleWidth > bounceCanvas.width) paddleX = bounceCanvas.width - paddleWidth; }
+            ballX += ballSpeedX; ballY += ballSpeedY;
+            if (ballX - ballRadius <= 0 || ballX + ballRadius >= bounceCanvas.width) ballSpeedX = -ballSpeedX;
+            if (ballY - ballRadius <= 0) ballSpeedY = -ballSpeedY;
+            if (ballY + ballRadius >= bounceCanvas.height) { endBounce(); return; }
+            if (ballY + ballRadius >= paddleY && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
+                ballSpeedY = -Math.abs(ballSpeedY);
+                var hitPos = (ballX - paddleX) / paddleWidth;
+                ballSpeedX = 8 * (hitPos - 0.5);
+            }
+            for (var i = coins.length - 1; i >= 0; i--) {
+                var coin = coins[i];
+                var dx = ballX - coin.x, dy = ballY - coin.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < ballRadius + coin.radius) {
+                    bounceScore += 10; document.getElementById('bounceScore').innerHTML = bounceScore;
+                    coins.splice(i, 1); spawnCoin();
+                    if (Math.random() < 0.3) spawnCoin();
+                } else {
+                    bounceCtx.beginPath(); bounceCtx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
+                    bounceCtx.fillStyle = '#f1c40f'; bounceCtx.fill();
+                    bounceCtx.strokeStyle = '#d4ac0d'; bounceCtx.lineWidth = 2; bounceCtx.stroke();
+                    bounceCtx.fillStyle = '#fff'; bounceCtx.font = '14px Arial'; bounceCtx.textAlign = 'center';
+                    bounceCtx.fillText('$', coin.x, coin.y + 5); bounceCtx.closePath();
+                }
+            }
+            bounceCtx.beginPath(); bounceCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            bounceCtx.fillStyle = '#e74c3c'; bounceCtx.fill(); bounceCtx.closePath();
+            bounceCtx.fillStyle = '#3498db'; bounceCtx.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
+            bounceAnimFrame = requestAnimationFrame(gameLoopBounce);
+        }
+
+        function endBounce() {
+            bounceRunning = false; paddleLeft = false; paddleRight = false;
+            if (bounceAnimFrame) cancelAnimationFrame(bounceAnimFrame);
+            document.getElementById('bounceFinalScore').innerHTML = bounceScore;
+            document.getElementById('bounceGameOver').style.display = 'flex';
+        }
+
+        function restartBounce() { initBounce(); }
+
+        document.addEventListener('keydown', function(e) {
+            if (!bounceRunning) return;
+            if (e.key === 'ArrowLeft') paddleLeft = true;
+            if (e.key === 'ArrowRight') paddleRight = true;
+        });
+
+        document.addEventListener('keyup', function(e) {
+            if (e.key === 'ArrowLeft') paddleLeft = false;
+            if (e.key === 'ArrowRight') paddleRight = false;
+        });
+
+        initBounce();
+    </script>
+</body>
+</html>
