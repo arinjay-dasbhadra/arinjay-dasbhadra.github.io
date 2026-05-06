@@ -258,6 +258,18 @@ body {
    <a href="arcadeindex.html">Games</a>
 </div>
 
+
+<div id="chatContainer" style="max-width:500px;margin:20px auto;background:white;padding:15px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.2);">
+
+  <div id="chatBox" style="height:250px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin-bottom:10px;">
+    <p><b>AI:</b> Hello! Ask me to open games, stories, coding 😊</p>
+  </div>
+
+  <input type="text" id="aiInput" placeholder="Type here..." style="width:70%;padding:10px;">
+  <button onclick="handleAI()" style="padding:10px;">Send</button>
+
+</div>
+
  
 <div class="slideshow-container">
 
@@ -489,7 +501,70 @@ span.onclick = function() {
  
 </ul>
  
-  
+<script>
+function addMessage(sender, text) {
+    let chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML += "<p><b>" + sender + ":</b> " + text + "</p>";
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function normalize(text) {
+    return text.toLowerCase().trim();
+}
+
+function handleAI() {
+    let inputField = document.getElementById("aiInput");
+    let input = normalize(inputField.value);
+
+    if (input === "") return;
+
+    addMessage("You", input);
+
+    let response = "I didn't understand that 🤔";
+
+    // NAVIGATION COMMANDS
+    if (input.includes("game") || input.includes("play") || input.includes("fun")) {
+        response = "Opening Games 🎮";
+        setTimeout(() => { window.location.href = "arcadeindex.html"; }, 1000);
+    }
+    else if (input.includes("story") || input.includes("read")) {
+        response = "Opening Stories 📖";
+        setTimeout(() => { window.location.href = "stories.html"; }, 1000);
+    }
+    else if (input.includes("art") || input.includes("painting") || input.includes("draw")) {
+        response = "Opening Arts 🎨";
+        setTimeout(() => { window.location.href = "paintings.html"; }, 1000);
+    }
+    else if (input.includes("code") || input.includes("coding") || input.includes("program")) {
+        response = "Opening Coding 💻";
+        setTimeout(() => { window.location.href = "codings.html"; }, 1000);
+    }
+    else if (input.includes("home")) {
+        response = "Going Home 🏠";
+        setTimeout(() => { window.location.href = "index.html"; }, 1000);
+    }
+
+    // SMALL TALK
+    else if (input.includes("hello") || input.includes("hi")) {
+        response = "Hello! 👋";
+    }
+    else if (input.includes("who are you")) {
+        response = "I'm your website assistant 🤖";
+    }
+
+    addMessage("AI", response);
+    inputField.value = "";
+}
+
+// ENTER KEY SUPPORT
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("aiInput").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            handleAI();
+        }
+    });
+});
+</script>
 
 </body>
 </html>
