@@ -516,7 +516,10 @@ function addMessage(sender, text) {
 }
 
 function normalize(text) {
-    return text.toLowerCase().trim();
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")  // removes punctuation .?!, etc
+        .trim();
 }
 
 function handleAI() {
