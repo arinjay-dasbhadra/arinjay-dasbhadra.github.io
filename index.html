@@ -527,36 +527,38 @@ function handleAI() {
 
     addMessage("You", input);
 
-    let response = "I didn't understand that 🤔";
+    let response = "I didn't understand that ";
 
-    // NAVIGATION COMMANDS
     if (input.includes("game") || input.includes("play") || input.includes("fun")) {
-        response = "Opening Games 🎮";
+        response = "Opening Games ";
         setTimeout(() => { window.location.href = "arcadeindex.html"; }, 1000);
     }
     else if (input.includes("story") || input.includes("read")) {
-        response = "Opening Stories 📖";
+        response = "Opening Stories ";
         setTimeout(() => { window.location.href = "stories.html"; }, 1000);
     }
     else if (input.includes("art") || input.includes("painting") || input.includes("draw") || input.includes("craft")) {
-        response = "Opening Arts and Crafts 🎨";
+        response = "Opening Arts and Crafts ";
         setTimeout(() => { window.location.href = "paintings.html"; }, 1000);
     }
     else if (input.includes("code") || input.includes("coding") || input.includes("program")) {
-        response = "Opening Coding 💻";
+        response = "Opening Coding ";
         setTimeout(() => { window.location.href = "codings.html"; }, 1000);
     }
     else if (input.includes("home")) {
-        response = "Going Home 🏠";
+        response = "Going Home ";
         setTimeout(() => { window.location.href = "index.html"; }, 1000);
     }
 
-    // SMALL TALK
     else if (input.includes("hello") || input.includes("hi")) {
-        response = "Hello! 👋";
+        response = "Hello! ";
+    }
+
+    else if (input.includes("how are you") || input.includes("are you fine")) {
+        response = "I am fine.";
     }
     else if (input.includes("who are you")) {
-        response = "I'm your website assistant 🤖";
+        response = "I'm your website assistant ";
     }
 
     addMessage("AI", response);
