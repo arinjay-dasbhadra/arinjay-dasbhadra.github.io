@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Solver</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            flex-direction: column;
+        }
+        #gameContainer {
+            background: #16213e;
+            border: 4px solid #9b59b6;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(155, 89, 182, 0.3);
+        }
+        h1 { color: #9b59b6; font-size: 28px; margin-bottom: 10px; text-shadow: 0 0 15px #9b59b6; }
+        canvas {
+            border: 3px solid #9b59b6;
+            border-radius: 6px;
+            cursor: crosshair;
+            display: block;
+            margin: 10px auto;
+            background: #fff;
+        }
+        .controls { margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .controls button, .controls .mode-btn {
+            padding: 10px 20px;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .mode-btn.active { box-shadow: 0 0 15px currentColor; transform: scale(1.05); }
+        #wallMode { background: #555; color: #fff; }
+        #wallMode.active { background: #333; box-shadow: 0 0 15px #555; }
+        #startMode { background: #2ecc71; color: #fff; }
+        #startMode.active { box-shadow: 0 0 15px #2ecc71; }
+        #endMode { background: #e74c3c; color: #fff; }
+        #endMode.active { box-shadow: 0 0 15px #e74c3c; }
+        #eraseMode { background: #f39c12; color: #fff; }
+        #eraseMode.active { box-shadow: 0 0 15px #f39c12; }
+        #solveBtn { background: #9b59b6; color: #fff; }
+        #solveBtn:hover { background: #8e44ad; }
+        #clearBtn { background: #555; color: #fff; }
+        #clearBtn:hover { background: #444; }
+        .upload-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .upload-wrap input[type="file"] {
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .upload-label {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            background: #2c3e50;
+            color: #fff;
+            transition: 0.2s;
+        }
+        .upload-label:hover { background: #1a252f; }
+        #removeImgBtn { background: #e67e22; color: #fff; }
+        #removeImgBtn:hover { background: #d35400; }
+        .threshold-row { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; color: #aaa; font-size: 14px; }
+        .threshold-row input[type="range"] { width: 200px; cursor: pointer; }
+        .threshold-row span { color: #fff; font-weight: bold; min-width: 30px; }
+        #detectBtn { background: #2c3e50; color: #fff; }
+        #backBtn {
+            padding: 8px 16px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+        }
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        #status { color: #aaa; font-size: 14px; margin-top: 10px; min-height: 24px; }
+        .status-path { color: #2ecc71; }
+        .status-nopath { color: #e74c3c; }
+        .status-info { color: #f39c12; }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div class="top-row">
+            <h1>MAZE SOLVER</h1>
+            <a href="arcadeindex.html" id="backBtn">&#8592; Menu</a>
+        </div>
+        <canvas id="mazeCanvas" width="500" height="500"></canvas>
+        <div class="controls">
+            <button id="wallMode" class="mode-btn active">Draw Wall</button>
+            <button id="startMode" class="mode-btn">Place Start</button>
+            <button id="endMode" class="mode-btn">Place End</button>
+            <button id="eraseMode" class="mode-btn">Erase</button>
+            <button id="solveBtn">Solve</button>
+            <button id="clearBtn">Clear All</button>
+            <span class="upload-wrap">
+                <span class="upload-label">Upload Image</span>
+                <input type="file" id="imageUpload" accept="image/*">
+            </span>
+            <button id="removeImgBtn">Remove Image</button>
+        </div>
+        <div class="threshold-row">
+            <label>Wall threshold:</label>
+            <input type="range" id="thresholdSlider" min="0" max="255" value="180">
+            <span id="thresholdVal">180</span>
+            <button id="detectBtn">Auto Detect</button>
+        </div>
+        <div id="status">Draw walls, place Start (green) and End (red), then click Solve</div>
+    </div>
+
+    <script>
+        var canvas = document.getElementById('mazeCanvas');
+        var ctx = canvas.getContext('2d');
+        var CELL_SIZE = 10;
+        var COLS = 50;
+        var ROWS = 50;
+
+        var grid = [];
+        var start = null;
+        var end = null;
+        var drawing = false;
+        var bgImage = null;
+
+        for (var r = 0; r < ROWS; r++) {
+            grid[r] = [];
+            for (var c = 0; c < COLS; c++) {
+                grid[r][c] = 0;
+            }
+        }
+
+        var modes = ['wall', 'start', 'end', 'erase'];
+        var currentMode = 'wall';
+
+        var modeButtons = {
+            wall: document.getElementById('wallMode'),
+            start: document.getElementById('startMode'),
+            end: document.getElementById('endMode'),
+            erase: document.getElementById('eraseMode')
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            for (var m in modeButtons) {
+                modeButtons[m].classList.toggle('active', m === mode);
+            }
+        }
+
+        modeButtons.wall.onclick = function() { setMode('wall'); };
+        modeButtons.start.onclick = function() { setMode('start'); };
+        modeButtons.end.onclick = function() { setMode('end'); };
+        modeButtons.erase.onclick = function() { setMode('erase'); };
+
+        function getCell(e) {
+            var rect = canvas.getBoundingClientRect();
+            var scaleX = canvas.width / rect.width;
+            var scaleY = canvas.height / rect.height;
+            var x = (e.clientX - rect.left) * scaleX;
+            var y = (e.clientY - rect.top) * scaleY;
+            var col = Math.floor(x / CELL_SIZE);
+            var row = Math.floor(y / CELL_SIZE);
+            if (col < 0) col = 0;
+            if (row < 0) row = 0;
+            if (col >= COLS) col = COLS - 1;
+            if (row >= ROWS) row = ROWS - 1;
+            return {row: row, col: col};
+        }
+
+        canvas.onmousedown = function(e) {
+            drawing = true;
+            var cell = getCell(e);
+            if (currentMode === 'wall') {
+                if (cell.row !== (start && start.row) || cell.col !== (start && start.col)) {
+                    if (cell.row !== (end && end.row) || cell.col !== (end && end.col)) {
+                        grid[cell.row][cell.col] = 1;
+                        drawGrid();
+                    }
+                }
+            } else if (currentMode === 'erase') {
+                if (cell.row !== (start && start.row) || cell.col !== (start && start.col)) {
+                    if (cell.row !== (end && end.row) || cell.col !== (end && end.col)) {
+                        grid[cell.row][cell.col] = 0;
+                        drawGrid();
+                    }
+                }
+            } else if (currentMode === 'start') {
+                placeStart(cell);
+            } else if (currentMode === 'end') {
+                placeEnd(cell);
+            }
+        };
+
+        canvas.onmousemove = function(e) {
+            if (!drawing) return;
+            var cell = getCell(e);
+            if (currentMode === 'wall') {
+                if (cell.row !== (start && start.row) || cell.col !== (start && start.col)) {
+                    if (cell.row !== (end && end.row) || cell.col !== (end && end.col)) {
+                        grid[cell.row][cell.col] = 1;
+                        drawGrid();
+                    }
+                }
+            } else if (currentMode === 'erase') {
+                if (cell.row !== (start && start.row) || cell.col !== (start && start.col)) {
+                    if (cell.row !== (end && end.row) || cell.col !== (end && end.col)) {
+                        grid[cell.row][cell.col] = 0;
+                        drawGrid();
+                    }
+                }
+            }
+        };
+
+        canvas.onmouseup = function() { drawing = false; };
+        canvas.onmouseleave = function() { drawing = false; };
+
+        function placeStart(cell) {
+            if (end && cell.row === end.row && cell.col === end.col) return;
+            if (grid[cell.row][cell.col] === 1) return;
+            start = {row: cell.row, col: cell.col};
+            setMode('end');
+            drawGrid();
+        }
+
+        function placeEnd(cell) {
+            if (start && cell.row === start.row && cell.col === start.col) return;
+            if (grid[cell.row][cell.col] === 1) return;
+            end = {row: cell.row, col: cell.col};
+            setMode('wall');
+            drawGrid();
+        }
+
+        function drawGrid() {
+            if (bgImage) {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            for (var r = 0; r < ROWS; r++) {
+                for (var c = 0; c < COLS; c++) {
+                    if (grid[r][c] === 1) {
+                        ctx.fillStyle = '#555';
+                        ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            if (start) {
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(start.col * CELL_SIZE, start.row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('S', start.col * CELL_SIZE + CELL_SIZE / 2, start.row * CELL_SIZE + CELL_SIZE / 2);
+            }
+
+            if (end) {
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(end.col * CELL_SIZE, end.row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('E', end.col * CELL_SIZE + CELL_SIZE / 2, end.row * CELL_SIZE + CELL_SIZE / 2);
+            }
+
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 0.5;
+            for (var r = 0; r <= ROWS; r++) {
+                ctx.beginPath();
+                ctx.moveTo(0, r * CELL_SIZE);
+                ctx.lineTo(canvas.width, r * CELL_SIZE);
+                ctx.stroke();
+            }
+            for (var c = 0; c <= COLS; c++) {
+                ctx.beginPath();
+                ctx.moveTo(c * CELL_SIZE, 0);
+                ctx.lineTo(c * CELL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+        }
+
+        function solveMaze() {
+            if (!start || !end) {
+                document.getElementById('status').innerHTML = '<span class="status-info">Place both Start (S) and End (E) points first!</span>';
+                return;
+            }
+
+            var path = bfs();
+            var statusEl = document.getElementById('status');
+
+            drawGrid();
+
+            if (path === null) {
+                statusEl.innerHTML = '<span class="status-nopath">No path found! Try drawing a different maze.</span>';
+                return;
+            }
+
+            statusEl.innerHTML = '<span class="status-path">Path found! (' + path.length + ' steps)</span>';
+
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.5)';
+            for (var i = 1; i < path.length - 1; i++) {
+                var p = path[i];
+                ctx.fillRect(p.col * CELL_SIZE, p.row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.8)';
+            ctx.strokeStyle = '#2ecc71';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(path[0].col * CELL_SIZE + CELL_SIZE / 2, path[0].row * CELL_SIZE + CELL_SIZE / 2);
+            for (var i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i].col * CELL_SIZE + CELL_SIZE / 2, path[i].row * CELL_SIZE + CELL_SIZE / 2);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(start.col * CELL_SIZE, start.row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('S', start.col * CELL_SIZE + CELL_SIZE / 2, start.row * CELL_SIZE + CELL_SIZE / 2);
+
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(end.col * CELL_SIZE, end.row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('E', end.col * CELL_SIZE + CELL_SIZE / 2, end.row * CELL_SIZE + CELL_SIZE / 2);
+        }
+
+        function bfs() {
+            var directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+            var visited = [];
+            for (var r = 0; r < ROWS; r++) {
+                visited[r] = [];
+                for (var c = 0; c < COLS; c++) {
+                    visited[r][c] = false;
+                }
+            }
+
+            var queue = [{row: start.row, col: start.col, path: [{row: start.row, col: start.col}]}];
+            visited[start.row][start.col] = true;
+
+            while (queue.length > 0) {
+                var cur = queue.shift();
+                if (cur.row === end.row && cur.col === end.col) {
+                    return cur.path;
+                }
+                for (var d = 0; d < directions.length; d++) {
+                    var nr = cur.row + directions[d][0];
+                    var nc = cur.col + directions[d][1];
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && !visited[nr][nc] && grid[nr][nc] !== 1) {
+                        visited[nr][nc] = true;
+                        var newPath = cur.path.concat([{row: nr, col: nc}]);
+                        queue.push({row: nr, col: nc, path: newPath});
+                    }
+                }
+            }
+            return null;
+        }
+
+        function clearAll() {
+            for (var r = 0; r < ROWS; r++) {
+                for (var c = 0; c < COLS; c++) {
+                    grid[r][c] = 0;
+                }
+            }
+            start = null;
+            end = null;
+            drawGrid();
+            document.getElementById('status').innerHTML = 'Draw walls, place Start (green) and End (red), then click Solve';
+        }
+
+        function autoDetectWalls() {
+            if (!bgImage) return;
+            var c = document.createElement('canvas');
+            c.width = canvas.width;
+            c.height = canvas.height;
+            var cx = c.getContext('2d');
+            cx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            var imageData = cx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+            var threshold = parseInt(document.getElementById('thresholdSlider').value);
+
+            for (var r = 0; r < ROWS; r++) {
+                for (var c2 = 0; c2 < COLS; c2++) {
+                    var pixelX = Math.floor(c2 * CELL_SIZE + CELL_SIZE / 2);
+                    var pixelY = Math.floor(r * CELL_SIZE + CELL_SIZE / 2);
+                    var idx = (pixelY * canvas.width + pixelX) * 4;
+                    var brightness = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+                    grid[r][c2] = brightness < threshold ? 1 : 0;
+                }
+            }
+            drawGrid();
+            document.getElementById('status').innerHTML = '<span class="status-info">Walls auto-detected from image (threshold: ' + threshold + '). Adjust threshold and click Auto Detect again, or draw manually.</span>';
+        }
+
+        document.getElementById('solveBtn').onclick = solveMaze;
+        document.getElementById('clearBtn').onclick = clearAll;
+
+        document.getElementById('thresholdSlider').oninput = function() {
+            document.getElementById('thresholdVal').textContent = this.value;
+        };
+
+        document.getElementById('detectBtn').onclick = autoDetectWalls;
+
+        document.getElementById('imageUpload').onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var img = new Image();
+                img.onload = function() {
+                    bgImage = img;
+                    start = null;
+                    end = null;
+                    autoDetectWalls();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        document.getElementById('removeImgBtn').onclick = function() {
+            bgImage = null;
+            document.getElementById('imageUpload').value = '';
+            for (var r = 0; r < ROWS; r++) {
+                for (var c2 = 0; c2 < COLS; c2++) {
+                    grid[r][c2] = 0;
+                }
+            }
+            start = null;
+            end = null;
+            drawGrid();
+            document.getElementById('status').innerHTML = 'Draw walls, place Start (green) and End (red), then click Solve';
+        };
+
+        drawGrid();
+    </script>
+</body>
+</html>
